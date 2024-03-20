@@ -2,9 +2,11 @@ name: Test and Build
 
 on:
   push:
-    branches: [main]
+    branches:
+      - '*'
   pull_request:
-    branches: [main]
+    branches:
+      - '*'
 
 jobs:
   test_and_build:
@@ -20,4 +22,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-     
+      - name: Run tests
+        run: ./gradlew test
+        working-directory: ../../backend-desapp-api
+
+      - name: Build project
+        run: ./gradlew build
+        working-directory: ../../backend-desapp-api
