@@ -24,6 +24,9 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+          
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
 
       - name: Run tests
         run: backend-desapp-api/gradlew test
