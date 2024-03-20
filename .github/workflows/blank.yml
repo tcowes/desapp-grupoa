@@ -21,7 +21,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Run tests
-        run: ../backend-desapp-api/gradlew test
+        run: ../../DesarrolloDeApp/unq-desapp-2024s1-grupo-a/backend-desapp-api/gradlew test
 
       - name: Build project
         run: ../backend-desapp-api/gradlew build
