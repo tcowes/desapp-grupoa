@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Grant execute permissions to gradlew
+        run: chmod +x backend-desapp-api/gradlew
+
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
