@@ -2,9 +2,11 @@ name: Test and Build
 
 on:
   push:
-    branches: [main]
+    branches:
+      - '*'
   pull_request:
-    branches: [main]
+    branches:
+      - '*'
 
 jobs:
   test_and_build:
@@ -14,10 +16,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Grant execute permissions to gradlew
+        run: chmod +x backend-desapp-api/gradlew
+
       - name: Set up JDK
         uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
+          
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
 
-     
+      - name: Run tests
+        run: backend-desapp-api/gradlew test
+
+      - name: Build project
+        run: backend-desapp-api/gradlew build
