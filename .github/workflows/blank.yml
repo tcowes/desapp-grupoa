@@ -23,8 +23,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Run tests
-        run: ../gradlew test
+        run: ./backend-desapp-api/.gradle/wrapper/gradle-wrapper.jar test
 
       - name: Build project
         run: ../gradlew build
-        working-directory: ../../backend-desapp-api
