@@ -68,6 +68,12 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x backend-desapp-api/gradlew
+
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
+
       - name: SonarCloud analysis
         run: ./gradlew build jacocoTestReport sonar --info
         env:
