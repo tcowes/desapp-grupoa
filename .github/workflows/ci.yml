@@ -40,14 +40,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x backend-desapp-api/gradlew
+
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
           java-version: '17'
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x backend-desapp-api/gradlew
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
 
       - name: SonarCloud analysis
         run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
