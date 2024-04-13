@@ -75,6 +75,6 @@ jobs:
         run: backend-desapp-api/gradlew init --type kotlin-library
 
       - name: SonarCloud analysis
-        run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
+        run: backend-desapp-api/gradlew build jacocoTestReport sonar --info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

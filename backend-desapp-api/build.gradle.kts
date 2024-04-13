@@ -40,7 +40,7 @@ sonar {
 		property("sonar.projectKey", "tcowes_unq-desapp-2024s1-grupo-a")
 		property("sonar.organization", "tcowes")
 		property("sonar.host.url", "https://sonarcloud.io")
-		property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir\\reports\\jacoco\\test\\jacocoTestReport.xml")
+		property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir\\backend-desapp_api\\reports\\jacoco\\test\\jacocoTestReport.xml")
 	}
 }
 
