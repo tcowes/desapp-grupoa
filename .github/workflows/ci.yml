@@ -1,38 +1,54 @@
-name: Test and Build
+name: CI
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - '*'
+    branches: [ "*" ]
+    types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
-  test_and_build:
+
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Grant execute permissions to gradlew
-        run: chmod +x backend-desapp-api/gradlew
+      - name: Checkout project sources
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
           java-version: '17'
-          
-      - name: Initialize Gradle project (if not exists)
-        run: backend-desapp-api/gradlew init --type kotlin-library
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
 
       - name: Run tests
-        run: backend-desapp-api/gradlew test
-
-      - name: Build project
-        run: backend-desapp-api/gradlew build
+        run: ./gradlew test
 
   sonarcloud:
-    needs: [ "test_and_build" ]
+    needs: ["build", "test"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project sources
@@ -40,19 +56,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x backend-desapp-api/gradlew
-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
           java-version: '17'
 
-      - name: Initialize Gradle project (if not exists)
-        run: backend-desapp-api/gradlew init --type kotlin-library
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
 
       - name: SonarCloud analysis
-        run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
+        run: ./gradlew build jacocoTestReport sonarqube --info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
