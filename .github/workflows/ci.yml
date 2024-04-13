@@ -23,13 +23,13 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x backend-desapp-api/gradlew
+        run: chmod +x ./gradlew
 
       - name: Initialize Gradle project (if not exists)
-        run: backend-desapp-api/gradlew init --type kotlin-library
+        run: ./gradlew init --type kotlin-library
 
       - name: Build with Gradle
-        run: backend-desapp-api/gradlew build
+        run: ./gradlew build
 
   test:
     needs: build
@@ -45,13 +45,13 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x backend-desapp-api/gradlew
+        run: chmod +x ./gradlew
 
       - name: Initialize Gradle project (if not exists)
-        run: backend-desapp-api/gradlew init --type kotlin-library
+        run: ./gradlew init --type kotlin-library
 
       - name: Run tests
-        run: backend-desapp-api/gradlew test
+        run: ./gradlew test
 
   sonarcloud:
     needs: ["build", "test"]
@@ -69,12 +69,12 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x backend-desapp-api/gradlew
+        run: chmod +x ./gradlew
 
       - name: Initialize Gradle project (if not exists)
-        run: backend-desapp-api/gradlew init --type kotlin-library
+        run: ./gradlew init --type kotlin-library
 
       - name: SonarCloud analysis
-        run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
+        run: ./gradlew build jacocoTestReport sonarqube --info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
