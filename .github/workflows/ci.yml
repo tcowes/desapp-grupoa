@@ -16,11 +16,11 @@ jobs:
       - name: Grant execute permissions to gradlew
         run: chmod +x backend-desapp-api/gradlew
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'adopt'
+          distribution: 'corretto'
+          java-version: '17'
           
       - name: Initialize Gradle project (if not exists)
         run: backend-desapp-api/gradlew init --type kotlin-library
@@ -30,3 +30,26 @@ jobs:
 
       - name: Build project
         run: backend-desapp-api/gradlew build
+
+  sonarcloud:
+    needs: [ "test_and_build" ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x backend-desapp-api/gradlew
+
+      - name: SonarCloud analysis
+        run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
