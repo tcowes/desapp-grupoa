@@ -23,10 +23,10 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x backend-desapp-api/gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: backend-desapp-api/gradlew build
 
   test:
     needs: build
@@ -42,10 +42,10 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x backend-desapp-api/gradlew
 
       - name: Run tests
-        run: ./gradlew test
+        run: backend-desapp-api/gradlew test
 
   sonarcloud:
     needs: ["build", "test"]
@@ -63,9 +63,9 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x backend-desapp-api/gradlew
 
       - name: SonarCloud analysis
-        run: ./gradlew build jacocoTestReport sonarqube --info
+        run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
