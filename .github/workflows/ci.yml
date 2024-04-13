@@ -25,6 +25,9 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x backend-desapp-api/gradlew
 
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
+
       - name: Build with Gradle
         run: backend-desapp-api/gradlew build
 
@@ -43,6 +46,9 @@ jobs:
 
       - name: Grant execute permission to gradlew
         run: chmod +x backend-desapp-api/gradlew
+
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
 
       - name: Run tests
         run: backend-desapp-api/gradlew test
@@ -64,6 +70,9 @@ jobs:
 
       - name: Grant execute permission to gradlew
         run: chmod +x backend-desapp-api/gradlew
+
+      - name: Initialize Gradle project (if not exists)
+        run: backend-desapp-api/gradlew init --type kotlin-library
 
       - name: SonarCloud analysis
         run: backend-desapp-api/gradlew build jacocoTestReport sonarqube --info
