@@ -26,6 +26,12 @@ class UserController (private val userService: UserService){
 
         userService.createUser(newUser)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado exitosamente")
+        return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered.")
+    }
+
+    @PostMapping("/clear")
+    fun clear(): ResponseEntity<String> {
+        userService.clear()
+        return ResponseEntity.ok("Database cleaned successfully")
     }
 }
