@@ -6,24 +6,38 @@ import jakarta.validation.constraints.*
 @Entity
 class User(
     @Column(nullable = false)
+    @Size(min = 3, max = 30)
     var name: String,
 
     @Column(nullable = false)
+    @Size(min = 3, max = 30)
     var surname: String,
 
     @Column(nullable = false, unique = true)
+    @Email
     var email: String,
 
     @Column(nullable = false)
+    @Size(min = 10, max = 30)
     var address: String,
 
     @Column(nullable = false)
+    @Pattern.List(
+        value = [
+            Pattern(regexp = "(?=.*[a-z])", message = "Must contain at least one lower-case letter"),
+            Pattern(regexp = "(?=.*[A-Z])", message = "Must contain at least one upper-case letter"),
+            Pattern(regexp = "(?=.*[@#$%^&+=])", message = "Must contain at least one special character"),
+            Pattern(regexp = ".{6,}", message = "Must contain at least 6 characters")
+        ]
+    )
     var password: String,
 
     @Column(nullable = false, unique = true)
+    @Pattern(regexp = "\\d{22}", message = "Must contain exactly 22 characters")
     var cvu: String,
 
     @Column(nullable = false, unique = true)
+    @Pattern(regexp = "\\d{22}", message = "Must contain exactly 8 characters")
     var walletAddress: String,
 
     @Column(nullable = false)

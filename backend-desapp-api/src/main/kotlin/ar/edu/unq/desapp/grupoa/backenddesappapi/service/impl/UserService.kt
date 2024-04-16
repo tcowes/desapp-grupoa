@@ -30,6 +30,9 @@ class UserService: UserService {
                 else -> throw ex
             }
         }
+        if (userRepository.existsByEmail(user.email)) throw UserAlreadyRegisteredException("email", user.email)
+        if (userRepository.existsByCVU(user.cvu)) throw UserAlreadyRegisteredException("cvu", user.cvu)
+        if (userRepository.existsByWallet(user.walletAddress)) throw UserAlreadyRegisteredException("wallet", user.walletAddress)
         return userRepository.save(user)
     }
 
