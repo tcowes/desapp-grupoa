@@ -33,6 +33,11 @@ class UserServiceTest {
 	}
 
 	@Test
+	fun aFalse() {
+		assert(false)
+	}
+
+	@Test
 	fun aUserGetsCreatedSuccessfully() {
 		userService.createUser(userToCreate)
 		val userCreated = userService.getUserById(userToCreate.id!!)
