@@ -1,5 +1,7 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.UserDTO
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl.UserService
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -19,15 +21,13 @@ class UserController (private val userService: UserService){
     fun register(@Valid @RequestBody userData: UserDTO): ResponseEntity<String> {
         try {
             userService.createUser(userData.toModel())
-            return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered.")
-        } catch (Exception: RuntimeException) { // TODO: cambiar por excepcion custom
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong!")
+        } catch (ex: Throwable) {
+            when (ex) {
+                is ErrorCreatingUser, is UserAlreadyRegisteredException ->
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
+            }
         }
+        return ResponseEntity.status(HttpStatus.CREATED).body("Welcome ${userData.name} ${userData.surname}! You've been successfully registered.")
     }
 
-    @PostMapping("/clear")  // TODO: BORRAR ESTO, no está bueno tener endpoints para limpiar la base
-    fun clear(): ResponseEntity<String> {
-        userService.deleteAll()
-        return ResponseEntity.ok("Database cleaned successfully")
-    }
 }
