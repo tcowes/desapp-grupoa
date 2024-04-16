@@ -2,6 +2,7 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -75,6 +76,60 @@ class UserServiceTest {
 		userService.createUser(user)
 		val userCreated = userService.getUserById(user.id!!)
 		assertEquals(0.0, userCreated.reputation)
+	}
+
+	@Test
+	fun cantRegisterUserWithDuplicatedEmail() {
+		val userWithSameMail = User(
+			"NotSatoshi",
+			"NotNakamoto",
+			"satonaka@gmail.com",
+			"Fake Street 124",
+			"Security1234!",
+			"0011223344556677889912",
+			"01234563",
+		)
+		userService.createUser(userToCreate)
+		val error = assertThrows<UserAlreadyRegisteredException> {
+			userService.createUser(userWithSameMail)
+		}
+		assertEquals("There's a user with the email satonaka@gmail.com already registered in the database.", error.message)
+	}
+
+	@Test
+	fun cantRegisterUserWithDuplicatedCvu() {
+		val userWithSameMail = User(
+			"NotSatoshi",
+			"NotNakamoto",
+			"notsatonaka@gmail.com",
+			"Fake Street 124",
+			"Security1234!",
+			"0011223344556677889911",
+			"01234563",
+		)
+		userService.createUser(userToCreate)
+		val error = assertThrows<UserAlreadyRegisteredException> {
+			userService.createUser(userWithSameMail)
+		}
+		assertEquals("There's a user with the cvu 0011223344556677889911 already registered in the database.", error.message)
+	}
+
+	@Test
+	fun cantRegisterUserWithDuplicatedWalletAddress() {
+		val userWithSameMail = User(
+			"NotSatoshi",
+			"NotNakamoto",
+			"notsatonaka@gmail.com",
+			"Fake Street 124",
+			"Security1234!",
+			"0011223344556677889912",
+			"01234567",
+		)
+		userService.createUser(userToCreate)
+		val error = assertThrows<UserAlreadyRegisteredException> {
+			userService.createUser(userWithSameMail)
+		}
+		assertEquals("There's a user with the wallet 01234567 already registered in the database.", error.message)
 	}
 
 	@ParameterizedTest
