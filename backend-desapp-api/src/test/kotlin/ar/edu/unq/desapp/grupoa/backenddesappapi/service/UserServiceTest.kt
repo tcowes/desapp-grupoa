@@ -5,6 +5,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingU
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -44,6 +45,14 @@ class UserServiceTest {
 		assertEquals(userToCreate.cvu, userCreated.cvu)
 		assertEquals(userToCreate.walletAddress, userCreated.walletAddress)
 		assertEquals(userToCreate.reputation, userCreated.reputation)
+	}
+
+	@Test
+	fun findByIdWithExistingIdReturnsUser(){
+		val userCreated = userService.createUser(userToCreate)
+		val user = userService.getUserById(userCreated.id!!)
+		assertEquals(userCreated.id!!, user.id!!)
+
 	}
 
 	@Test
