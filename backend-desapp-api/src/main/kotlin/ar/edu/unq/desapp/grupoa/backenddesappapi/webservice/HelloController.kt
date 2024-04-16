@@ -1,4 +1,4 @@
-package ar.edu.unq.desapp.grupoa.backenddesappapi.controller
+package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.GetMapping
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @Tag(name = "Hello World", description = "Endpoint to test that Spring and Swagger were configured correctly")
 class HelloController {
+    // TODO: BORRAR ESTO
 
     @GetMapping("/")
     fun index(): String {
