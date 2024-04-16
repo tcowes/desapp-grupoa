@@ -4,6 +4,8 @@ plugins {
 	war
 	id("org.springframework.boot") version "3.2.3"
 	id("io.spring.dependency-management") version "1.1.4"
+	id("org.sonarqube") version "4.3.1.3277"
+	id("jacoco")
 	kotlin("jvm") version "1.9.22"
 	kotlin("plugin.spring") version "1.9.22"
 	kotlin("plugin.jpa") version "1.9.22"
@@ -37,6 +39,15 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 }
 
+sonar {
+	properties {
+		property("sonar.projectKey", "tcowes_unq-desapp-2024s1-grupo-a")
+		property("sonar.organization", "tcowes")
+		property("sonar.host.url", "https://sonarcloud.io")
+		property("sonar.coverage.jacoco.xmlReportPaths", "$buildDir\\backend-desapp_api\\reports\\jacoco\\test\\jacocoTestReport.xml")
+	}
+}
+
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
 		freeCompilerArgs += "-Xjsr305=strict"
@@ -46,4 +57,17 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+
+tasks.jacocoTestReport {
+	reports {
+		xml.required.set(true)
+		csv.required.set(false)
+		html.required.set(false)
+	}
+}
+
+jacoco {
+	toolVersion = "0.8.8"
 }
