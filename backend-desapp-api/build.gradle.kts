@@ -37,6 +37,8 @@ dependencies {
 	// testImplementation("org.springframework.security:spring-security-test")
 	implementation("mysql:mysql-connector-java:8.0.33")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+	implementation("com.github.kittinunf.fuel:fuel:2.3.1")
+	implementation ("org.json:json:20210307")
 }
 
 sonar {
