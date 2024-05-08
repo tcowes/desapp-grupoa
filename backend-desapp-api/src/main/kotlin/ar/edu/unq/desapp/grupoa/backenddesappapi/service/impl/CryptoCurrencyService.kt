@@ -13,15 +13,14 @@ class CryptoCurrencyService : CryptoService {
 
     @Autowired
     private lateinit var binanceApi: BinanceApi
-    override fun showCryptoAssetQuotes(): List<String> {
-        val cryptoassets = CryptoCurrencyEnum.values().toList()
-        val quotes = mutableListOf<String>()
+    override fun showCryptoAssetQuotes(): Map<String, Float?> {
+        val cryptoassets = CryptoCurrencyEnum.entries
+        val quotes = emptyMap<String, Float?>().toMutableMap()
         for (cryptoasset in cryptoassets) {
             try {
-                val data = binanceApi.getCryptoCurrencyValue(cryptoasset.name)
-                quotes.add("${cryptoasset.name}: $data")
+                quotes[cryptoasset.name] = binanceApi.getCryptoCurrencyValue(cryptoasset.name)
             } catch (e: Exception) {
-                quotes.add("Error getting quote for ${cryptoasset.name}: ${e.message}")
+                quotes[cryptoasset.name] = null
             }
         }
         return quotes

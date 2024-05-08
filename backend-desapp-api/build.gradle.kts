@@ -31,7 +31,6 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	runtimeOnly("com.h2database:h2")
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	// testImplementation("org.springframework.security:spring-security-test")
@@ -39,6 +38,8 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 	implementation("com.github.kittinunf.fuel:fuel:2.3.1")
 	implementation ("org.json:json:20210307")
+	runtimeOnly("org.hsqldb:hsqldb:2.7.1")
+
 }
 
 sonar {
