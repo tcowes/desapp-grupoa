@@ -1,7 +1,10 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.Intention
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.*
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.ErrorCreatingIntention
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidCryptoactiveException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidOperationException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.IntentionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
 import jakarta.persistence.EntityNotFoundException
@@ -16,7 +19,12 @@ class IntentionServiceImpl : IntentionService {
         try{
             intention.validateIntentionData()
         } catch (ex: Throwable) {
-            throw ex
+            when (ex) {
+                is InvalidOperationException,
+                is InvalidCryptoactiveException,
+                is UsernameIntentException -> throw ErrorCreatingIntention(ex.message!!)
+                else -> throw ex
+            }
         }
         if(!intentionRepository.existsNameUser(intention.nameUser, intention.surnameUser)) throw UsernameIntentException(intention.nameUser, intention.surnameUser)
         return intentionRepository.save(intention)

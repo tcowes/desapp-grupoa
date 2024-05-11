@@ -1,6 +1,7 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.model
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.InvalidIntentionDataException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidCryptoactiveException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidOperationException
 import jakarta.persistence.*
 
 
@@ -35,8 +36,8 @@ class Intention(
     var id: Long? = null
 
     fun validateIntentionData() {
-        if (!isValidCryptoactive(cryptoactive)) { throw InvalidIntentionDataException("Invalid cryptoactive: $cryptoactive") }
-        if (!isValidOperation(operation)) { throw InvalidIntentionDataException("Invalid operation: $operation") }
+        if (!isValidCryptoactive(cryptoactive)) { throw InvalidCryptoactiveException() }
+        if (!isValidOperation(operation)) { throw InvalidOperationException() }
     }
 
     private fun isValidCryptoactive(cryptoactive: CryptoCurrencyEnum): Boolean {
