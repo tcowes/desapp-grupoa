@@ -15,5 +15,4 @@ enum class CryptoCurrencyEnum {
     ADAUSDT,
     TRXUSDT,
     AUDIOUSDT
-
 }

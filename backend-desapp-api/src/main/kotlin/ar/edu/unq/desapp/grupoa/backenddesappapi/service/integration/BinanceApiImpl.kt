@@ -2,6 +2,7 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import org.json.JSONArray
+import org.json.JSONObject
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.ZoneOffset
@@ -9,11 +10,11 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class BinanceApiImpl : BinanceApi {
-    override fun getCryptoCurrencyValue(symbol: String): String {
+    override fun getCryptoCurrencyValue(symbol: String): Float {
         val url = "https://api.binance.com/api/v3/ticker/price?symbol=$symbol"
         val (_, _, result) = url.httpGet().responseString()
         return when (result) {
-            is Result.Success -> result.get()
+            is Result.Success -> JSONObject(result.get()).get("price").toString().toFloat()
             is Result.Failure -> throw RuntimeException("Error getting quote for: $symbol: ${result.error}")
         }
     }
