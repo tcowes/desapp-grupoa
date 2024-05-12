@@ -1,6 +1,5 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
-class CryptoCurrencyService : CryptoService {
+class CryptoCurrencyServiceImpl : CryptoService {
 
     @Autowired
     private lateinit var binanceApi: BinanceApi
