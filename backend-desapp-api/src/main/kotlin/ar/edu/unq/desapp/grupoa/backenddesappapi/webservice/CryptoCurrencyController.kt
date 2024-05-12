@@ -10,15 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+// TODO: Documentar controller y endpoints
 @RestController
-@RequestMapping("/cryptoCurrency")
+@RequestMapping("/crypto-currency")
 class CryptoCurrencyController {
 
     @Autowired
     private lateinit var cryptoCurrencyService: CryptoCurrencyService
 
     @GetMapping("/cryptoasset-quotes")
-    fun showCryptoAssetQuotes(): ResponseEntity<List<String>> {
+    fun showCryptoAssetQuotes(): ResponseEntity<Map<String, Float?>> {
         val quotes = cryptoCurrencyService.showCryptoAssetQuotes()
         return ResponseEntity.ok(quotes)
     }
