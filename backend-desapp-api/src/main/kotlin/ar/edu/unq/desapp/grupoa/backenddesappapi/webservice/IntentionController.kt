@@ -22,13 +22,20 @@ class IntentionController {
     private lateinit var intentionService: IntentionService
 
     @PostMapping("/create")
-    fun createIntention(@Valid @RequestBody intentionDto: IntentionDTO): ResponseEntity<String> {
+    fun createIntention(@Valid @RequestBody intentionDTO: IntentionDTO): ResponseEntity<String> {
         try {
-            intentionService.createIntention(intentionDto.toModel())
+            intentionService.createIntention(
+                intentionDTO.cryptoactive,
+                intentionDTO.amountOfCrypto,
+                intentionDTO.lastQuotation,
+                intentionDTO.userId,
+                intentionDTO.operation
+            )
         } catch (ex: Throwable) {
             when (ex) {
                 is ErrorCreatingIntention ->
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create intention: ${ex.message}")
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Failed to create intention: ${ex.message}")
             }
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Intention created successfully")

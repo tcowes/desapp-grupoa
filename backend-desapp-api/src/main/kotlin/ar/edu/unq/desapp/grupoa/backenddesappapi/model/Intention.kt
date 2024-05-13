@@ -11,9 +11,6 @@ class Intention(
     val cryptoactive: CryptoCurrencyEnum,
 
     @Column(nullable = false)
-    val symbol: String,
-
-    @Column(nullable = false)
     val amountOfCrypto: Double,
 
     @Column(nullable = false)
@@ -22,11 +19,8 @@ class Intention(
     @Column(nullable = false)
     val amountInPesos: Double,
 
-    @Column(nullable = false)
-    val nameUser: String,
-
-    @Column(nullable = false)
-    val surnameUser: String,
+    @ManyToOne(cascade = [CascadeType.ALL])
+    val user: User,
 
     @Column(nullable = false)
     val operation: OperationEnum,
@@ -41,9 +35,9 @@ class Intention(
     }
 
     private fun isValidCryptoactive(cryptoactive: CryptoCurrencyEnum): Boolean {
-        return cryptoactive in CryptoCurrencyEnum.values()
+        return cryptoactive in CryptoCurrencyEnum.entries.toTypedArray()
     }
     private fun isValidOperation(operation: OperationEnum): Boolean {
-        return operation in OperationEnum.values()
+        return operation in OperationEnum.entries.toTypedArray()
     }
 }

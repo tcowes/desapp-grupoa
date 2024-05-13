@@ -7,9 +7,11 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class UserService: UserService {
+@Transactional
+class UserServiceImpl : UserService {
     @Autowired
     private lateinit var userRepository: UserRepository
 
@@ -27,12 +29,16 @@ class UserService: UserService {
                 is InvalidEmailException,
                 is BadAddressException,
                 is BadBankDataException -> throw ErrorCreatingUser(ex.message!!)
+
                 else -> throw ex
             }
         }
         if (userRepository.existsByEmail(user.email)) throw UserAlreadyRegisteredException("email", user.email)
-        if (userRepository.existsByCVU(user.cvu)) throw UserAlreadyRegisteredException("cvu", user.cvu)
-        if (userRepository.existsByWallet(user.walletAddress)) throw UserAlreadyRegisteredException("wallet", user.walletAddress)
+        if (userRepository.existsByCvu(user.cvu)) throw UserAlreadyRegisteredException("cvu", user.cvu)
+        if (userRepository.existsByWalletAddress(user.walletAddress)) throw UserAlreadyRegisteredException(
+            "wallet",
+            user.walletAddress
+        )
         return userRepository.save(user)
     }
 
