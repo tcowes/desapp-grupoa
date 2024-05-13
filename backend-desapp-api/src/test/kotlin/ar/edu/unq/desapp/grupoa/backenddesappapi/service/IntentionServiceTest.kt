@@ -3,11 +3,15 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -39,6 +43,45 @@ class IntentionServiceTest {
             )
         )
     }
+
+    @Test
+    fun anIntentionIsCreatedSuccessfully(){
+        val intention = intentionService.createIntention(
+            CryptoCurrencyEnum.ETHUSDT,
+            2.0,
+            3999.0,
+            user.id!!,
+            OperationEnum.BUY)
+        val intentionCreated = intentionService.getIntentionById(intention.id!!)
+        assertEquals(intentionCreated.cryptoactive, intention.cryptoactive)
+        assertEquals(intentionCreated.amountOfCrypto, intention.amountOfCrypto)
+        assertEquals(intentionCreated.lastQuotation, intention.lastQuotation)
+        assertEquals(intentionCreated.amountInPesos, intention.amountInPesos)
+        assertEquals(intentionCreated.user.id, intention.user.id)
+        assertEquals(intentionCreated.operation, intention.operation)
+
+    }
+
+    @Test
+    fun anIntentIsCreatedUnsuccessfullyByAnUnRegisteredUser(){
+        val unregisteredUserId = 123L
+
+        val error = org.junit.jupiter.api.assertThrows<UsernameIntentException> {
+            intentionService.createIntention(
+                CryptoCurrencyEnum.ETHUSDT,
+                2.0,
+                3999.0,
+                unregisteredUserId,
+                OperationEnum.BUY
+            )
+        }
+
+        assertEquals("Error: user with id $unregisteredUserId is not registered to make a BUY/SELL Intent", error.message)
+
+    }
+
+
+
 
     @Test
     fun listIntentionsForUserHaveTheUserId() {
