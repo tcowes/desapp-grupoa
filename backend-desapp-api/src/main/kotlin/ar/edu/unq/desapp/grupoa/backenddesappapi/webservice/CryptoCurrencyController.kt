@@ -1,7 +1,7 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl.CryptoCurrencyService
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 class CryptoCurrencyController {
 
     @Autowired
-    private lateinit var cryptoCurrencyService: CryptoCurrencyService
+    private lateinit var cryptoCurrencyService: CryptoService
 
     @GetMapping("/cryptoasset-quotes")
     fun showCryptoAssetQuotes(): ResponseEntity<Map<String, Float?>> {
