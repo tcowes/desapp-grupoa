@@ -1,7 +1,5 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.model
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidCryptoactiveException
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidOperationException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.OutOfRangePriceException
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -38,17 +36,9 @@ class Intention(
     var id: Long? = null
 
     fun validateIntentionData(priceForCrypto: Float?) {
-        if (!isValidCryptoactive(cryptoactive)) { throw InvalidCryptoactiveException() }
-        if (!isValidOperation(operation)) { throw InvalidOperationException() }
         if (priceForCrypto == null || !(lastQuotation*0.95 <= priceForCrypto && priceForCrypto <= lastQuotation*1.05)) {
             throw OutOfRangePriceException()
         }
     }
 
-    private fun isValidCryptoactive(cryptoactive: CryptoCurrencyEnum): Boolean {
-        return cryptoactive in CryptoCurrencyEnum.entries.toTypedArray()
-    }
-    private fun isValidOperation(operation: OperationEnum): Boolean {
-        return operation in OperationEnum.entries.toTypedArray()
-    }
 }

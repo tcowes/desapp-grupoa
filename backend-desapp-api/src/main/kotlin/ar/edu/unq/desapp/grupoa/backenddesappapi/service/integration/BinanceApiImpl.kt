@@ -14,7 +14,7 @@ class BinanceApiImpl : BinanceApi {
         val url = "https://api.binance.com/api/v3/ticker/price?symbol=$symbol"
         val (_, _, result) = url.httpGet().responseString()
         return when (result) {
-            is Result.Success -> JSONObject(result.get()).get("price").toString().toFloat()
+            is Result.Success -> JSONObject(result.get())["price"].toString().toFloat()
             is Result.Failure -> throw RuntimeException("Error getting quote for: $symbol: ${result.error}")
         }
     }

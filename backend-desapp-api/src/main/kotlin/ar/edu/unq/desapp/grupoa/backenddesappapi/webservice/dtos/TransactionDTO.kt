@@ -1,7 +1,6 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
-import org.springframework.boot.autoconfigure.amqp.RabbitConnectionDetails.Address
 
 data class TransactionDTO(
     val cryptoactive: CryptoCurrencyEnum,

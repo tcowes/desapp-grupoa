@@ -22,23 +22,32 @@ repositories {
 	mavenCentral()
 }
 
+val javaxValidationVersion = "2.0.1.Final"
+val mySqlConnectorVersion = "8.0.33"
+val springDocVersion = "2.2.0"
+val githubFuelVersion = "2.3.1"
+val jsonVersion = "20210307"
+val hsqlVersion = "2.7.1"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	// implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("javax.validation:validation-api:2.0.1.Final")
+	implementation("javax.validation:validation-api:${javaxValidationVersion}")
 	implementation("org.hibernate.validator:hibernate-validator")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	implementation("mysql:mysql-connector-java:${mySqlConnectorVersion}")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}")
+	implementation("com.github.kittinunf.fuel:fuel:${githubFuelVersion}")
+	implementation ("org.json:json:${jsonVersion}")
+
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+	runtimeOnly("org.hsqldb:hsqldb:${hsqlVersion}")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	// testImplementation("org.springframework.security:spring-security-test")
-	implementation("mysql:mysql-connector-java:8.0.33")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
-	implementation("com.github.kittinunf.fuel:fuel:2.3.1")
-	implementation ("org.json:json:20210307")
-	runtimeOnly("org.hsqldb:hsqldb:2.7.1")
 
 }
 
