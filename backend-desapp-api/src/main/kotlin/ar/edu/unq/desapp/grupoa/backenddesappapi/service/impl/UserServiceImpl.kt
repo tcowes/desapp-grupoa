@@ -1,19 +1,33 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.Transaction
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.*
+import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.IntentionRepository
+import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Clock
 
 @Service
 @Transactional
 class UserServiceImpl : UserService {
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var intentionRepository: IntentionRepository
+
+    @Autowired
+    private lateinit var transactionRepository: TransactionRepository
+
+    @Autowired
+    private lateinit var cryptoService: CryptoService
 
     override fun getUserById(id: Long): User {
         return userRepository.findById(id).orElseThrow { EntityNotFoundException("User not found with id: $id") }
@@ -40,6 +54,23 @@ class UserServiceImpl : UserService {
             user.walletAddress
         )
         return userRepository.save(user)
+    }
+
+    override fun beginTransaction(userId: Long, intentionId: Long, clock: Clock?): Transaction {
+        val user = getUserById(userId)
+        val intention = intentionRepository.findById(intentionId)
+            .orElseThrow { EntityNotFoundException("User not found with id: $intentionId") }
+        val actualPriceForCrypto = cryptoService.getCryptoQuote(intention.cryptoactive)
+        val transaction = user.beginTransaction(intention!!, actualPriceForCrypto!!.toDouble(), clock)
+        return transactionRepository.save(transaction)
+    }
+
+    override fun finishTransaction(userId: Long, transactionId: Long, clock: Clock?) {
+        val user = getUserById(userId)
+        val transaction = transactionRepository.findById(transactionId)
+            .orElseThrow { EntityNotFoundException("User not found with id: $transactionId") }
+        user.finishTransaction(transaction, clock)
+        userRepository.save(user)
     }
 
     override fun deleteAll() {
