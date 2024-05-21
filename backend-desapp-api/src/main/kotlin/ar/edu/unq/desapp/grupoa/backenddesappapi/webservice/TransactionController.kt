@@ -2,22 +2,33 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.TransactionService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.VolumeOperatedDTO
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping("/transactions")
-class TransactionController(private val transactionService: TransactionService) {
+class TransactionController {
+    @Autowired
+    private lateinit var transactionService: TransactionService
 
     @GetMapping("/volume")
     fun getVolumeOperated(@RequestParam userId: Long, @RequestParam startDate: String, @RequestParam endDate: String): VolumeOperatedDTO {
         val formatter = DateTimeFormatter.ISO_DATE_TIME
-        val start = LocalDateTime.parse(startDate, formatter)
-        val end = LocalDateTime.parse(endDate, formatter)
-        return transactionService.getVolumeOperated(userId, start, end)
+        return try {
+            val start = LocalDateTime.parse(startDate, formatter)
+            val end = LocalDateTime.parse(endDate, formatter)
+            transactionService.getVolumeOperated(userId, start, end)
+        } catch (e: DateTimeParseException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Please use 'YYYY-MM-DDTHH:MM:SS'", e)
+        }
     }
 }

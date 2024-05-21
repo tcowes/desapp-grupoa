@@ -5,8 +5,9 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTran
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.TransactionService
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.dataResponse.CoinGeckoResponse
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.CryptoAssetDTO
-import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.ExchangeRateResponse
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.dataResponse.ExchangeRateResponse
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.VolumeOperatedDTO
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -75,14 +77,20 @@ class TransactionServiceImpl : TransactionService {
     }
 
     private fun getCurrentCryptoPriceInUSD(cryptoAsset: String): BigDecimal {
-        val apiUrl = "https://api.coingecko.com/api/v3/coins/$cryptoAsset" //usar binance?
+        val apiUrl = UriComponentsBuilder.fromHttpUrl("https://api.coingecko.com/api/v3/coins")
+            .pathSegment(cryptoAsset)
+            .build()
+            .toUriString()
+
         return try {
+            val restTemplate = RestTemplate()
             val response = restTemplate.getForObject(apiUrl, CoinGeckoResponse::class.java)
             response?.market_data?.current_price?.get("usd")
-                ?: throw ExchangeRateException("No se pudo obtener el precio del criptoactivo $cryptocurrency en USD")
+                ?: throw ExchangeRateException("Could not get price of $cryptoAsset cryptocurrency in USD")
         } catch (e: RestClientException) {
-            throw ExchangeRateException("Error al obtener el precio del criptoactivo $cryptocurrency en USD: ${e.message}")
+            throw ExchangeRateException("Error when obtaining the price of the crypto asset $cryptoAsset in USD: ${e.message}")
         }
+
 
     }
 

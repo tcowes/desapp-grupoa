@@ -1,4 +1,4 @@
-package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos
+package ar.edu.unq.desapp.grupoa.backenddesappapi.service.dataResponse
 
 import java.math.BigDecimal
 
