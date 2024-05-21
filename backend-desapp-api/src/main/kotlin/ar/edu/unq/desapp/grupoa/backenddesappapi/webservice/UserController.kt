@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -125,11 +126,12 @@ class UserController {
         return try {
             val user = userService.getUserById(userId)
             val dto = TransactionDTO.fromModel(userService.beginTransaction(userId, intentionId, defaultClock), user)
-            ResponseEntity.ok().body(dto)
-        } catch (e: NoSuchElementException) {
-            ResponseEntity(e.message, HttpStatus.NOT_FOUND)
-        } catch (e: Throwable) {
-            ResponseEntity.badRequest().body(e.message)
+            ResponseEntity.status(HttpStatus.CREATED)
+                .body(dto)
+        } catch (ex: EntityNotFoundException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body("${ex.message}")
+        } catch (ex: Throwable) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
         }
     }
 
