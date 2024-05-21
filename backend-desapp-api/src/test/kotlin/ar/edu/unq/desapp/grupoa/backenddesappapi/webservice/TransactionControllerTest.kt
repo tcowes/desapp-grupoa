@@ -1,14 +1,13 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.service.TransactionService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -17,9 +16,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class TransactionControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var transactionService: TransactionService
 
     @Test
     fun testGetVolumeOperatedWithValidParameters() {
@@ -39,13 +35,14 @@ class TransactionControllerTest {
     fun testGetVolumeOperatedWithInvalidDateFormat() {
         val request = MockMvcRequestBuilders.get("/transactions/volume")
             .param("userId", "1")
-            .param("startDate", "2023-ABCD-01") 
+            .param("startDate", "2023-ABCD-01")
             .param("endDate", "2023-01-31T23:59:59")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
 
         mockMvc.perform(request)
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value("Bad Request"))
-            .andExpect(jsonPath("$.message").value("Invalid date format. Please use 'YYYY-MM-DDTHH:MM:SS'"))
+            .andExpect(
+                MockMvcResultMatchers.content().string("Invalid date format. Please use 'YYYY-MM-DDTHH:MM:SS'")
+            )
     }
 }
