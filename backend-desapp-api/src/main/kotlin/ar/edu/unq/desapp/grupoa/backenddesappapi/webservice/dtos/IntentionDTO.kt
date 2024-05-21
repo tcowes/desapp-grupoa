@@ -9,10 +9,8 @@ data class CreationIntentionDTO(
     val cryptoactive: CryptoCurrencyEnum,
     val amountOfCrypto: Double,
     val lastQuotation: Double,
-    val amountInPesos: Double,
     val userId: Long,
     val operation: OperationEnum,
-    val dateCreated: LocalDateTime
 )
 
 data class IntentionDTO(

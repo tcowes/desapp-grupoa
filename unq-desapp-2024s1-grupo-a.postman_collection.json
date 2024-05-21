@@ -1,0 +1,432 @@
+{
+	"info": {
+		"_postman_id": "6ef6b3f2-53cf-40c3-b373-3637c8ba6b6e",
+		"name": "unq-desapp-2024s1-grupo-a",
+		"description": "Colección de requests con tests para los endpoints declarados en el repositorio [https://github.com/tcowes/unq-desapp-2024s1-grupo-a](https://github.com/tcowes/unq-desapp-2024s1-grupo-a)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18732513",
+		"_collection_link": "https://cloudy-moon-640480.postman.co/workspace/NoiseCloud~70496858-7847-44ce-9238-ac11a6863b71/collection/18732513-6ef6b3f2-53cf-40c3-b373-3637c8ba6b6e?action=share&source=collection_link&creator=18732513"
+	},
+	"item": [
+		{
+			"name": "Crypto Currencies",
+			"item": [
+				{
+					"name": "Get All Crypto Asset Quotes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is JSON\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains quotes\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('object');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/crypto-currency/cryptoasset-quotes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-currency",
+								"cryptoasset-quotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[200] - Get Crypto Asset Quotes Last 24 Hours",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Caso exitoso \r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is JSON\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains quotes\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/crypto-currency/quotes-last-24-hours?symbol=BTCUSDT",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-currency",
+								"quotes-last-24-hours"
+							],
+							"query": [
+								{
+									"key": "symbol",
+									"value": "BTCUSDT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[400] - Get Crypto Asset Quotes Last 24 Hours",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Caso de error\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is JSON\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error message is correct\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql([\"Error: Incorrect cryptocurrency symbol\"]);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/crypto-currency/quotes-last-24-hours?symbol=INVALID",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-currency",
+								"quotes-last-24-hours"
+							],
+							"query": [
+								{
+									"key": "symbol",
+									"value": "INVALID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Intentions",
+			"item": [
+				{
+					"name": "[201] - Create Intention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is Text\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"text/plain;charset=UTF-8\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Intention creation successful message\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql(\"Intention created successfully\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cryptoactive\": \"BTCUSDT\",\r\n  \"amountOfCrypto\": 1.5,\r\n  \"lastQuotation\": 45000.0,\r\n  \"userId\": 123,\r\n  \"operation\": \"SELL\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/intentions/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"intentions",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[404] - Create Intention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is Text\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"text/plain;charset=UTF-8\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User not found error message\", function () {\r",
+									"    pm.expect(pm.response.text()).to.eql(\"Didn't found any user with id 999\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cryptoactive\": \"BTCUSDT\",\r\n  \"amountOfCrypto\": 1.5,\r\n  \"lastQuotation\": 45000.0,\r\n  \"userId\": 999,\r\n  \"operation\": \"SELL\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/intentions/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"intentions",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[400] - Create Intention",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is Text\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"text/plain;charset=UTF-8\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Out of range price error message\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.include(\"Failed to create intention:\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"cryptoactive\": \"BTCUSDT\",\r\n  \"amountOfCrypto\": 1.5,\r\n  \"lastQuotation\": 100.0,\r\n  \"userId\": 123,\r\n  \"operation\": \"SELL\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/intentions/create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"intentions",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Active Intentions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is JSON\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response contains list of active intentions\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/intentions/all-active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"intentions",
+								"all-active"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "[201] - Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is Text\", function () {\r",
+									"    pm.response.to.have.header(\"Content-Type\", \"text/plain;charset=UTF-8\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Registration success message\", function () {\r",
+									"    pm.expect(pm-response.text()).to.include(\"Welcome John Doe! You've been successfully registered.\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"email\": \"john.doe@gmail.com\",\r\n  \"address\": \"Fake Street 123456\",\r\n  \"password\": \"Password123!?\",\r\n  \"cvu\": \"2222222222222222222222\",\r\n  \"walletAddress\": \"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		}
+	]
+}
