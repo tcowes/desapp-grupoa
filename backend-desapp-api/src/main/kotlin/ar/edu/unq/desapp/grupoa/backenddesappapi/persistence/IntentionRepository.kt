@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface IntentionRepository : JpaRepository<Intention, Long> {
-    fun findAllByUserId(userId: Long): List<Intention>
+    fun findAllByAvailableIsTrue(): List<Intention>
 }

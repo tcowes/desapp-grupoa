@@ -1,4 +1,5 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
+
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
@@ -12,6 +13,16 @@ class CryptoCurrencyServiceImpl : CryptoService {
 
     @Autowired
     private lateinit var binanceApi: BinanceApi
+
+
+    override fun getCryptoQuote(cryptoActiveName: CryptoCurrencyEnum): Float? {
+        return try {
+            binanceApi.getCryptoCurrencyValue(cryptoActiveName.name)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override fun showCryptoAssetQuotes(): Map<String, Float?> {
         val cryptoassets = CryptoCurrencyEnum.entries
         val quotes = emptyMap<String, Float?>().toMutableMap()

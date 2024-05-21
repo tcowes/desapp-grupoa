@@ -3,17 +3,18 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.OutOfRangePriceException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
-import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 
 
 @SpringBootTest
@@ -26,10 +27,16 @@ class IntentionServiceTest {
     @Autowired
     private lateinit var userService: UserService
 
+    @MockBean
+    private lateinit var cryptoService: CryptoService
+
     private lateinit var user: User
 
     @BeforeEach
     fun setUp() {
+        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.BTCUSDT)).thenReturn(null)
+        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1000F)
+
         user = userService.createUser(
             User(
                 "Satoshi",
@@ -45,13 +52,14 @@ class IntentionServiceTest {
     }
 
     @Test
-    fun anIntentionIsCreatedSuccessfully(){
+    fun anIntentionIsCreatedSuccessfully() {
         val intention = intentionService.createIntention(
             CryptoCurrencyEnum.ETHUSDT,
             2.0,
-            3999.0,
+            1000.0,
             user.id!!,
-            OperationEnum.BUY)
+            OperationEnum.BUY
+        )
         val intentionCreated = intentionService.getIntentionById(intention.id!!)
         assertEquals(intentionCreated.cryptoactive, intention.cryptoactive)
         assertEquals(intentionCreated.amountOfCrypto, intention.amountOfCrypto)
@@ -63,50 +71,107 @@ class IntentionServiceTest {
     }
 
     @Test
-    fun anIntentIsCreatedUnsuccessfullyByAnUnRegisteredUser(){
+    fun anIntentExceedingPriceLimitThrowsError() {
+        val error = org.junit.jupiter.api.assertThrows<OutOfRangePriceException> {
+            intentionService.createIntention(
+                CryptoCurrencyEnum.ETHUSDT,
+                2.0,
+                2000.0,
+                user.id!!,
+                OperationEnum.BUY
+            )
+        }
+
+        assertEquals(
+            "Price for the intention must be within five percent of the current price for the cryptocurrency.",
+            error.message
+        )
+
+    }
+
+    @Test
+    fun anIntentWithPriceBelowLimitThrowsError() {
+        val error = org.junit.jupiter.api.assertThrows<OutOfRangePriceException> {
+            intentionService.createIntention(
+                CryptoCurrencyEnum.ETHUSDT,
+                2.0,
+                900.0,
+                user.id!!,
+                OperationEnum.BUY
+            )
+        }
+
+        assertEquals(
+            "Price for the intention must be within five percent of the current price for the cryptocurrency.",
+            error.message
+        )
+
+    }
+
+    @Test
+    fun anIntentWithUnkownPriceFromCryptocurrencyThrowsError() {
+        val error = org.junit.jupiter.api.assertThrows<OutOfRangePriceException> {
+            intentionService.createIntention(
+                CryptoCurrencyEnum.ETHUSDT,
+                2.0,
+                900.0,
+                user.id!!,
+                OperationEnum.BUY
+            )
+        }
+
+        assertEquals(
+            "Price for the intention must be within five percent of the current price for the cryptocurrency.",
+            error.message
+        )
+
+    }
+
+    @Test
+    fun anIntentIsCreatedUnsuccessfullyByAnUnRegisteredUser() {
         val unregisteredUserId = 123L
 
         val error = org.junit.jupiter.api.assertThrows<UsernameIntentException> {
             intentionService.createIntention(
-                CryptoCurrencyEnum.ETHUSDT,
+                CryptoCurrencyEnum.BTCUSDT,
                 2.0,
-                3999.0,
+                1000.0,
                 unregisteredUserId,
                 OperationEnum.BUY
             )
         }
 
-        assertEquals("Error: user with id $unregisteredUserId is not registered to make a BUY/SELL Intent", error.message)
+        assertEquals(
+            "Error: user with id $unregisteredUserId is not registered to make a BUY/SELL Intent",
+            error.message
+        )
 
     }
 
-
-
-
     @Test
-    fun listIntentionsForUserHaveTheUserId() {
+    fun listActiveIntentions() {
         val intention1 = intentionService.createIntention(
             CryptoCurrencyEnum.ETHUSDT,
             2.0,
-            3999.0,
+            1000.0,
             user.id!!,
             OperationEnum.BUY
         )
         val intention2 = intentionService.createIntention(
             CryptoCurrencyEnum.ETHUSDT,
             1.0,
-            4070.0,
+            1020.0,
             user.id!!,
             OperationEnum.SELL
         )
         val intention3 = intentionService.createIntention(
             CryptoCurrencyEnum.ETHUSDT,
             1.0,
-            4100.0,
+            999.0,
             user.id!!,
             OperationEnum.SELL
         )
-        val intentions = intentionService.listIntentionsForUser(user.id!!)
+        val intentions = intentionService.listActiveIntentions()
 
         assertTrue(intentions.size == 3)
         assertTrue(intentions.any { it.id == intention1.id && it.user.id == user.id })
@@ -115,13 +180,38 @@ class IntentionServiceTest {
     }
 
     @Test
-    fun listIntentionsForUserThatHasNoIntentionsReturnsEmptyList() {
-        assertTrue(intentionService.listIntentionsForUser(user.id!!).isEmpty())
+    fun listActiveIntentionsWontShowInactiveIntentios() {
+        val intention1 = intentionService.createIntention(
+            CryptoCurrencyEnum.ETHUSDT,
+            2.0,
+            1000.0,
+            user.id!!,
+            OperationEnum.BUY
+        )
+        val intention2 = intentionService.createIntention(
+            CryptoCurrencyEnum.ETHUSDT,
+            1.0,
+            1020.0,
+            user.id!!,
+            OperationEnum.SELL
+        )
+        var intentions = intentionService.listActiveIntentions()
+
+        assertTrue(intentions.size == 2)
+        assertTrue(intentions.any { it.id == intention1.id && it.user.id == user.id })
+        assertTrue(intentions.any { it.id == intention2.id && it.user.id == user.id })
+
+        intention2.available = false
+        intentionService.updateIntention(intention2)
+
+        intentions = intentionService.listActiveIntentions()
+
+        assertTrue(intentions.size == 1)
     }
 
     @Test
-    fun listIntentionsWithNonexistentUserReturnsEmptyList() {
-        assertTrue(intentionService.listIntentionsForUser(999).isEmpty())
+    fun listActiveIntentionsReturnsEmptyListIfNoIntentionsRegistered() {
+        assertTrue(intentionService.listActiveIntentions().isEmpty())
     }
 
     @AfterEach
