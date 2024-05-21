@@ -3,9 +3,6 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.Intention
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.ErrorCreatingIntention
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidCryptoactiveException
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.InvalidOperationException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.IntentionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
@@ -46,17 +43,8 @@ class IntentionServiceImpl : IntentionService {
             operation,
             LocalDateTime.now(),
         )
-        try {
-            val actualPriceForCrypto: Float? = cryptoService.getCryptoQuote(crypto)
-            intention.validateIntentionData(actualPriceForCrypto)
-        } catch (ex: Throwable) {
-            when (ex) {
-                is InvalidOperationException,
-                is InvalidCryptoactiveException -> throw ErrorCreatingIntention(ex.message!!)
-
-                else -> throw ex
-            }
-        }
+        val actualPriceForCrypto: Float? = cryptoService.getCryptoQuote(crypto)
+        intention.validateIntentionData(actualPriceForCrypto)
         return intentionRepository.save(intention)
     }
 
