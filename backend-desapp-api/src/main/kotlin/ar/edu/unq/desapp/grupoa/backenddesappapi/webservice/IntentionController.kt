@@ -1,6 +1,5 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.ErrorCreatingIntention
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.OutOfRangePriceException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
@@ -87,7 +86,7 @@ class IntentionController {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("Didn't found any user with id ${intention.userId}")
 
-                is ErrorCreatingIntention, is OutOfRangePriceException ->
+                is OutOfRangePriceException ->
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Failed to create intention: ${ex.message}")
             }

@@ -37,7 +37,6 @@ class UserServiceTest {
     private lateinit var cryptoService: CryptoService
     private lateinit var userToCreate: User
     private lateinit var anotherUserToCreate: User
-    private val defaultClock = Clock.systemDefaultZone()
 
     @BeforeEach
     fun setUp() {
