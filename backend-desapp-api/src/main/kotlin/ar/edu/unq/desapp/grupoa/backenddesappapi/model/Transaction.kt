@@ -21,6 +21,9 @@ class Transaction(
     var amount: Double,
 
     @Column
+    var price: Double,
+
+    @Column
     var createdAt: LocalDateTime,
 
     @Enumerated(EnumType.STRING)

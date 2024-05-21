@@ -30,8 +30,13 @@ data class IntentionDTO(
 
     companion object {
         fun fromModel(intention: Intention): IntentionDTO {
-            val totalTransactions: Int = intention.user.transactionsAsBuyer.size + intention.user.transactionsAsSeller.size
-            val reputation: Any = if (intention.user.reputation == 0.0) { "No operations" } else { totalTransactions / intention.user.reputation }
+            val totalTransactions: Int =
+                intention.user.transactionsAsBuyer.size + intention.user.transactionsAsSeller.size
+            val reputation: Any = if (intention.user.reputation == 0.0) {
+                "No operations"
+            } else {
+                totalTransactions / intention.user.reputation
+            }
             return IntentionDTO(
                 intention.cryptoactive,
                 intention.amountOfCrypto,

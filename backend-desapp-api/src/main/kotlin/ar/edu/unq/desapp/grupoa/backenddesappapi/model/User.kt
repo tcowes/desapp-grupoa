@@ -123,10 +123,18 @@ class User(
             }
         }
         return if (shouldCancel) {
-            Transaction(null, null, intention.cryptoactive, price, now, TransactionStatus.CANCELED)
+            Transaction(
+                null,
+                null,
+                intention.cryptoactive,
+                intention.amountOfCrypto,
+                price,
+                now,
+                TransactionStatus.CANCELED
+            )
         } else {
             intention.available = false
-            Transaction(seller, buyer, intention.cryptoactive, price, now)
+            Transaction(seller, buyer, intention.cryptoactive, intention.amountOfCrypto, price, now)
         }
     }
 

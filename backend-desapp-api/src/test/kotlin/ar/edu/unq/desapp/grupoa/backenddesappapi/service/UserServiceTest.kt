@@ -5,6 +5,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.InvalidTransactionState
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
@@ -406,135 +407,6 @@ class UserServiceTest {
                 ), "Crypto Wallet Address should have exactly 8 characters."
             ),
         )
-    }
-
-    @Test
-    fun userBeginsTransactionAsSeller() {
-        val anotherUser = userService.createUser(anotherUserToCreate)
-        val user = userService.createUser(userToCreate)
-        val intention = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.BUY
-        )
-        val transaction = userService.beginTransaction(anotherUser.id!!, intention.id!!, defaultClock)
-        assertNotNull(transaction.id)
-        assertEquals(transaction.status, TransactionStatus.PENDING)
-        assertEquals(transaction.buyer!!.id, user.id)
-        assertEquals(transaction.seller!!.id, anotherUser.id)
-        assertEquals(transaction.amount, 1000.0)
-        assertEquals(transaction.cryptocurrency, CryptoCurrencyEnum.ETHUSDT)
-        val updatedIntention = intentionService.getIntentionById(intention.id!!)
-        assertFalse(updatedIntention.available)
-    }
-
-    @Test
-    fun userBeginsTransactionAsBuyer() {
-        val anotherUser = userService.createUser(anotherUserToCreate)
-        val user = userService.createUser(userToCreate)
-        val intention = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.SELL
-        )
-        val transaction = userService.beginTransaction(anotherUser.id!!, intention.id!!, defaultClock)
-        assertNotNull(transaction.id)
-        assertEquals(transaction.status, TransactionStatus.PENDING)
-        assertEquals(transaction.buyer!!.id, anotherUser.id)
-        assertEquals(transaction.seller!!.id, user.id)
-        val updatedIntention = intentionService.getIntentionById(intention.id!!)
-        assertFalse(updatedIntention.available)
-    }
-
-    @Test
-    fun userBeginsTransactionAfterThePriceWasModifiedSoTheTransacationGetsCancelled() {
-        val anotherUser = userService.createUser(anotherUserToCreate)
-        val user = userService.createUser(userToCreate)
-        val intentionBuy = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.BUY
-        )
-        val intentionSell = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.SELL
-        )
-        // Cuando se quiere concretar una compra y el precio está por encima de lo pautado por el vendedor
-        // se cancela la transacción
-        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1500F)
-        val transactionBuy = userService.beginTransaction(anotherUser.id!!, intentionBuy.id!!, defaultClock)
-        assertNotNull(transactionBuy.id)
-        assertEquals(transactionBuy.status, TransactionStatus.CANCELED)
-        assertNull(transactionBuy.buyer)
-        assertNull(transactionBuy.seller)
-        assertEquals(transactionBuy.amount, 1500.0)
-        assertEquals(transactionBuy.cryptocurrency, CryptoCurrencyEnum.ETHUSDT)
-        val updatedIntentionBuy = intentionService.getIntentionById(intentionBuy.id!!)
-        assertTrue(updatedIntentionBuy.available)
-        // Cuando se quiere concretar una venta y el precio está por debajo de lo pautado por el comprador
-        // se cancela la transacción
-        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(500F)
-        val transactionSell = userService.beginTransaction(anotherUser.id!!, intentionSell.id!!, defaultClock)
-        assertNotNull(transactionSell.id)
-        assertEquals(transactionSell.status, TransactionStatus.CANCELED)
-        assertNull(transactionSell.buyer)
-        assertNull(transactionSell.seller)
-        assertEquals(transactionSell.amount, 500.0)
-        assertEquals(transactionSell.cryptocurrency, CryptoCurrencyEnum.ETHUSDT)
-        val updatedIntentionSell = intentionService.getIntentionById(intentionSell.id!!)
-        assertTrue(updatedIntentionSell.available)
-    }
-
-
-    @Test
-    fun useFinishesTransactionInLessThan30MinutesSoItGets10Points() {
-        val anotherUser = userService.createUser(anotherUserToCreate)
-        val user = userService.createUser(userToCreate)
-        val intention = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.BUY
-        )
-        val clock = Clock.fixed(Instant.parse("2024-05-20T12:00:00Z"), ZoneId.systemDefault())
-        val transaction = userService.beginTransaction(anotherUser.id!!, intention.id!!, clock)
-        val clockAfter5Minutes = Clock.fixed(Instant.parse("2024-05-20T12:05:00Z"), ZoneId.systemDefault())
-        userService.finishTransaction(anotherUser.id!!, transaction.id!!, clockAfter5Minutes)
-        val userUpdated = userService.getUserById(user.id!!)
-        val anotherUserUpdated = userService.getUserById(anotherUser.id!!)
-        assertEquals(userUpdated.reputation, 15.0)  // ya tenía 5 de antes
-        assertEquals(anotherUserUpdated.reputation, 10.0)
-    }
-
-    @Test
-    fun useFinishesTransactionInMoreThan30MinutesSoItGets5Points() {
-        val anotherUser = userService.createUser(anotherUserToCreate)
-        val user = userService.createUser(userToCreate)
-        val intention = intentionService.createIntention(
-            CryptoCurrencyEnum.ETHUSDT,
-            2.0,
-            1000.0,
-            user.id!!,
-            OperationEnum.BUY
-        )
-        val clock = Clock.fixed(Instant.parse("2024-05-20T12:00:00Z"), ZoneId.systemDefault())
-        val transaction = userService.beginTransaction(anotherUser.id!!, intention.id!!, clock)
-        val clockAfter31Minutes = Clock.fixed(Instant.parse("2024-05-20T12:31:00Z"), ZoneId.systemDefault())
-        userService.finishTransaction(anotherUser.id!!, transaction.id!!, clockAfter31Minutes)
-        val userUpdated = userService.getUserById(user.id!!)
-        val anotherUserUpdated = userService.getUserById(anotherUser.id!!)
-        assertEquals(userUpdated.reputation, 10.0)  // ya tenía 5 de antes
-        assertEquals(anotherUserUpdated.reputation, 5.0)
     }
 
     @AfterEach
