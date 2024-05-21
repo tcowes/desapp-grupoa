@@ -9,11 +9,13 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsInte
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.IntentionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional
@@ -23,6 +25,9 @@ class IntentionServiceImpl : IntentionService {
 
     @Autowired
     private lateinit var userRepository: UserRepository
+
+    @Autowired
+    private lateinit var cryptoService: CryptoService
 
     override fun createIntention(
         crypto: CryptoCurrencyEnum,
@@ -38,10 +43,12 @@ class IntentionServiceImpl : IntentionService {
             price,
             quantity * price * 1085, // TODO: 1085 es un valor actual del dolar, habría que saberlo en el momento
             user,
-            operation
+            operation,
+            LocalDateTime.now(),
         )
         try {
-            intention.validateIntentionData() // TODO: acá habría que validar que price no está fuera del margen del 10% en base a la cotización de la cripto
+            val actualPriceForCrypto: Float? = cryptoService.getCryptoQuote(crypto)
+            intention.validateIntentionData(actualPriceForCrypto)
         } catch (ex: Throwable) {
             when (ex) {
                 is InvalidOperationException,
@@ -53,8 +60,12 @@ class IntentionServiceImpl : IntentionService {
         return intentionRepository.save(intention)
     }
 
-    override fun listIntentionsForUser(userId: Long): List<Intention> {
-        return intentionRepository.findAllByUserId(userId)
+    override fun updateIntention(intention: Intention): Intention {
+        return intentionRepository.save(intention)
+    }
+
+    override fun listActiveIntentions(): List<Intention> {
+        return intentionRepository.findAllByAvailableIsTrue()
     }
 
     override fun getIntentionById(id: Long): Intention {
