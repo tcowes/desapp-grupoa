@@ -1,15 +1,19 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.Transaction
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.ExchangeRateException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.TransactionService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.CryptoAssetDTO
+import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.ExchangeRateResponse
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.VolumeOperatedDTO
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestTemplate
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
@@ -21,6 +25,8 @@ class TransactionServiceImpl : TransactionService {
 
     @Autowired
     private lateinit var transactionRepository: TransactionRepository
+
+    private val restTemplate: RestTemplate = RestTemplate()
 
     override fun getTransactionById(transactionId: Long): Transaction {
         return transactionRepository.findById(transactionId)
@@ -59,11 +65,25 @@ class TransactionServiceImpl : TransactionService {
     }
 
     private fun getCurrentUSDtoARSExchangeRate(): BigDecimal {
-        return BigDecimal(220)
+        val apiUrl = "https://dolarapi.com/v1/dolares/oficial"
+        return try {
+            val response = restTemplate.getForObject(apiUrl, ExchangeRateResponse::class.java)
+            response?.venta ?: throw ExchangeRateException("Could not get USD to ARS exchange rate")
+        } catch (e: RestClientException) {
+            throw ExchangeRateException("Error getting USD to ARS exchange rate: ${e.message}")
+        }
     }
 
     private fun getCurrentCryptoPriceInUSD(cryptoAsset: String): BigDecimal {
-        return BigDecimal(50000)
+        val apiUrl = "https://api.coingecko.com/api/v3/coins/$cryptoAsset" //usar binance?
+        return try {
+            val response = restTemplate.getForObject(apiUrl, CoinGeckoResponse::class.java)
+            response?.market_data?.current_price?.get("usd")
+                ?: throw ExchangeRateException("No se pudo obtener el precio del criptoactivo $cryptocurrency en USD")
+        } catch (e: RestClientException) {
+            throw ExchangeRateException("Error al obtener el precio del criptoactivo $cryptocurrency en USD: ${e.message}")
+        }
+
     }
 
     override fun deleteAll() {
