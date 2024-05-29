@@ -1,6 +1,6 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.model
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.InvalidTransactionState
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
 import jakarta.persistence.*
 import java.time.LocalDateTime
 

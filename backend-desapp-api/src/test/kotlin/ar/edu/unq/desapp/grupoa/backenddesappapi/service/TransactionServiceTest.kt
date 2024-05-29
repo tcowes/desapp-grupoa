@@ -4,15 +4,9 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.InvalidTransactionState
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
-import jakarta.persistence.EntityNotFoundException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

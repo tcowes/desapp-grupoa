@@ -1,4 +1,4 @@
-package ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions
+package ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
 
