@@ -1,11 +1,8 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.InvalidTransactionState
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
@@ -17,9 +14,6 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
