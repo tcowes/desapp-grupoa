@@ -24,16 +24,14 @@ class CryptoCurrencyServiceImpl : CryptoService {
     }
 
     override fun showCryptoAssetQuotes(): Map<String, Float?> {
-        val cryptoassets = CryptoCurrencyEnum.entries
-        val quotes = emptyMap<String, Float?>().toMutableMap()
-        for (cryptoasset in cryptoassets) {
-            try {
-                quotes[cryptoasset.name] = binanceApi.getCryptoCurrencyValue(cryptoasset.name)
-            } catch (e: Exception) {
-                quotes[cryptoasset.name] = null
-            }
+        return try {
+            val allQuotes = binanceApi.showCryptoAssetQuotes()
+            val cryptoAssets = CryptoCurrencyEnum.values().map { it.name }
+            allQuotes.filterKeys { it in cryptoAssets }
+        } catch (e: Exception) {
+            emptyMap()
         }
-        return quotes
+
     }
 
     override fun showCryptoAssetQuotesLast24Hours(cryptoCurrency: CryptoCurrencyEnum): List<String> {
