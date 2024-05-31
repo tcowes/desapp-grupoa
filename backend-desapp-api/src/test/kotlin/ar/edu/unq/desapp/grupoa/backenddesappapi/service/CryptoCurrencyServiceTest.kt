@@ -22,19 +22,23 @@ class CryptoCurrencyServiceTest {
 
     @Test
     fun testShowCryptoAssetQuotes() {
-        Mockito.`when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.ETHUSDT.name)).thenReturn(1000F)
-        Mockito.`when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.AAVEUSDT.name)).thenReturn(2000F)
-        Mockito.`when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.BTCUSDT.name)).thenThrow(RuntimeException())
+        val mockQuotes = mapOf(
+            "ETHUSDT" to 1000F,
+            "AAVEUSDT" to 2000F,
+            "BTCUSDT" to null
+        )
+
+        Mockito.`when`(binanceApi.showCryptoAssetQuotes()).thenReturn(mockQuotes)
 
         val cryptoAsset = cryptoService.showCryptoAssetQuotes()
 
         assertNotNull(cryptoAsset)
-        assertEquals(14, cryptoAsset.size)
+        assertEquals(3, cryptoAsset.size)
         assertEquals(2000F, cryptoAsset["AAVEUSDT"])
         assertEquals(1000F, cryptoAsset["ETHUSDT"])
         assertEquals(null, cryptoAsset["BTCUSDT"])
-
     }
+
 
     @Test
     fun testShowCryptoAssetQuotesLast24Hours() {
