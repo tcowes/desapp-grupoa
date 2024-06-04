@@ -10,9 +10,8 @@ data class TransactionDTO(
     val userLastName: String,
     val userAmountOfTransactions: Int,
     val userReputation: Any,
-    val address: String,
+    val address: String?,
     val action: String,
-    val cancelAction: String
 ) {
 
     companion object {
@@ -23,9 +22,13 @@ data class TransactionDTO(
             } else {
                 totalTransactions / user.reputation
             }
-            val address: String
+            val address: String?
             val action: String
-            if (transaction.buyer!!.id == user.id) {
+            if (transaction.status == TransactionStatus.CANCELED) {
+                address = null
+                action = "Transaction cancelled"
+            }
+            else if (transaction.buyer!!.id == user.id) {
                 // Es operacion de compra
                 address = user.walletAddress
                 action = "Please proceed to transfer"
@@ -43,7 +46,6 @@ data class TransactionDTO(
                 reputation,
                 address,
                 action,
-                "CANCEL"
             )
         }
     }
