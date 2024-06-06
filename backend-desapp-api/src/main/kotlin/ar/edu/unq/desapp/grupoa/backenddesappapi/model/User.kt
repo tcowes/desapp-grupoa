@@ -2,6 +2,7 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.model
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.*
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.SameUserForTransactionException
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Pattern
@@ -109,6 +110,10 @@ class User(
         var shouldCancel = false
         val buyer: User?
         val seller: User?
+
+        if (intention.user.id == this.id) {
+            throw SameUserForTransactionException()
+        }
 
         when (intention.operation) {
             OperationEnum.BUY -> {

@@ -1,10 +1,13 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.model
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.*
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.SameUserForTransactionException
 import jakarta.validation.Validation
 import jakarta.validation.Validator
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -91,6 +94,7 @@ class UserTest {
             cvu = "0987654321098765432109",
             walletAddress = "87654321"
         )
+        buyer.id = 2
 
         val intention = Intention(
             cryptoactive = CryptoCurrencyEnum.AAVEUSDT,
@@ -108,6 +112,25 @@ class UserTest {
     }
 
     @Test
+    fun aUserCannotBeginATransactionWithItsOwnIntention() {
+        val intention = Intention(
+            cryptoactive = CryptoCurrencyEnum.AAVEUSDT,
+            amountOfCrypto = 1.0,
+            lastQuotation = 50000.0,
+            amountInPesos = 50000.0,
+            user = user,
+            operation = OperationEnum.BUY,
+            dateCreated = LocalDateTime.now(),
+            available = true
+        )
+        val error = assertThrows<SameUserForTransactionException> { user.beginTransaction(intention, 49999.0) }
+        assertEquals(
+            "Is not allowed for a user that initiated an intention to begin a transaction with that intention.",
+            error.message
+        )
+    }
+
+    @Test
     fun beginTransactionShouldCreateACanceledTransactionIfConditionsAreNotMet() {
         val buyer = User(
             name = "Buyer",
@@ -118,6 +141,7 @@ class UserTest {
             cvu = "0987654321098765432109",
             walletAddress = "87654321"
         )
+        buyer.id = 2
 
         val intention = Intention(
             cryptoactive = CryptoCurrencyEnum.AAVEUSDT,
