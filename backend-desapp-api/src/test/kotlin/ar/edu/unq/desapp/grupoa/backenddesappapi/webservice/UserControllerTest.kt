@@ -139,8 +139,58 @@ class UserControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.userReputation").value("No operations"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.address").value(anotherUser.cvu))
             .andExpect(MockMvcResultMatchers.jsonPath("$.action").value("Please confirm reception"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.cancelAction").value("CANCEL"))
+    }
 
+    @Test
+    fun userCreatesTransactionCorrectlyButItAutomaticallyCancels() {
+        val user = userService.createUser(
+            User(
+                "NotSatoshi",
+                "NotNakamoto",
+                "notsatonaka@gmail.com",
+                "Fake Street 123",
+                "Security1234!",
+                "0011223344556677889912",
+                "01234567",
+                0.0,
+            )
+        )
+        val anotherUser = userService.createUser(
+            User(
+                "Itachi",
+                "Uchiha",
+                "longlivesasuke@gmail.com",
+                "Konoha Barrio Uchiha",
+                "Edotensei1234!=",
+                "2222222222222222222222",
+                "01234568",
+            )
+        )
+
+        val intention = intentionService.createIntention(
+            CryptoCurrencyEnum.BTCUSDT,
+            2.0,
+            1000.0,
+            user.id!!,
+            OperationEnum.BUY
+        )
+
+        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.BTCUSDT)).thenReturn(1100F)
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isCreated)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cryptoactive").value("BTCUSDT"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.amountOfCrypto").value(2.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.lastQuotation").value(1100.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userFirstName").value(anotherUser.name))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userLastName").value(anotherUser.surname))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userAmountOfTransactions").value(0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userReputation").value("No operations"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.address").value(null))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.action").value("Transaction cancelled"))
     }
 
     @Test

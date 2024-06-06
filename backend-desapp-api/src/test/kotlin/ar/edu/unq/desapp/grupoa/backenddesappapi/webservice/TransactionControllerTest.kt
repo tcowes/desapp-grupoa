@@ -22,7 +22,7 @@ class TransactionControllerTest {
         val request = MockMvcRequestBuilders.get("/transactions/volume")
             .param("userId", "1")
             .param("startDate", "2023-01-01T00:00:00")
-            .param("endDate", "2023-01-31T2359:59")
+            .param("endDate", "2023-01-31T23:59:59")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
 
         mockMvc.perform(request)
