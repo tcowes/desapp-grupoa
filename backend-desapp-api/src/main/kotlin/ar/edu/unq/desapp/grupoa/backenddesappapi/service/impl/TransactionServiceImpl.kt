@@ -27,7 +27,6 @@ class TransactionServiceImpl : TransactionService {
     @Autowired
     private lateinit var binanceApi: BinanceApi
 
-    private val restTemplate: RestTemplate = RestTemplate()
 
     override fun getTransactionById(transactionId: Long): Transaction {
         return transactionRepository.findById(transactionId)

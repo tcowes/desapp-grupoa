@@ -2,7 +2,6 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
-import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
@@ -12,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 @SpringBootTest
