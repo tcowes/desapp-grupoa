@@ -1,18 +1,18 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
+import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 @SpringBootTest
@@ -33,6 +33,8 @@ class TransactionServiceTest {
     private lateinit var anotherUserToCreate: User
     private val defaultClock = Clock.systemDefaultZone()
 
+    @MockBean
+    private lateinit var transactionRepository: TransactionRepository
     @BeforeEach
     fun setUp() {
         userToCreate = User(
@@ -56,7 +58,7 @@ class TransactionServiceTest {
             "01234568",
         )
 
-        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1000F)
+        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1000F)
     }
 
     @Test
@@ -119,8 +121,6 @@ class TransactionServiceTest {
             user.id!!,
             OperationEnum.SELL
         )
-        // Cuando se quiere concretar una compra y el precio está por encima de lo pautado por el vendedor
-        // se cancela la transacción
         Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1500F)
         val transactionBuy = userService.beginTransaction(anotherUser.id!!, intentionBuy.id!!, defaultClock)
         assertNotNull(transactionBuy.id)
@@ -247,6 +247,40 @@ class TransactionServiceTest {
         assertNull(transactionUpdated.seller)
         assertEquals(TransactionStatus.CANCELED, transactionUpdated.status)
     }
+
+    @Test
+    fun testGetVolumeOperated() {
+        val userId = 123L
+        val startDate = LocalDateTime.of(2024, 6, 1, 0, 0)
+        val endDate = LocalDateTime.of(2024, 6, 2, 0, 0)
+
+        val transactions = listOf(
+            Transaction(
+                seller = userToCreate,
+                buyer = anotherUserToCreate,
+                cryptocurrency = CryptoCurrencyEnum.ETHUSDT,
+                amount = 10.0,
+                price = 40000.0,
+                createdAt = LocalDateTime.now()
+            ),
+            Transaction(
+                seller = anotherUserToCreate,
+                buyer = userToCreate,
+                cryptocurrency = CryptoCurrencyEnum.ATOMUSDT,
+                amount = 20.0,
+                price = 2000.0,
+                createdAt = LocalDateTime.now()
+            )
+        )
+        `when`(transactionRepository.findByUserIdAndDateRange(userId, startDate, endDate))
+            .thenReturn(transactions)
+
+        val result = transactionService.getVolumeOperated(userId, startDate, endDate)
+
+        // Verifica el resultado
+        // Aquí puedes hacer aserciones sobre el resultado esperado de la función
+    }
+
 
     @AfterEach
     fun cleanUp() {
