@@ -5,6 +5,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -32,6 +33,15 @@ class CryptoCurrencyServiceImpl : CryptoService {
             emptyMap()
         }
 
+    }
+
+    override fun getCryptoCurrencyValueUSDTtoARS(): BigDecimal? {
+        return try {
+            val value = binanceApi.getCryptoCurrencyValue("USDTARS").toString()
+            BigDecimal(value)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override fun showCryptoAssetQuotesLast24Hours(cryptoCurrency: CryptoCurrencyEnum): List<String> {

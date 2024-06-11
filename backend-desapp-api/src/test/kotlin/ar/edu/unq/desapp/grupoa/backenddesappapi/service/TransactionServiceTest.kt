@@ -2,6 +2,7 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
@@ -9,8 +10,10 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 @SpringBootTest
@@ -119,7 +122,7 @@ class TransactionServiceTest {
         )
         // Cuando se quiere concretar una compra y el precio está por encima de lo pautado por el vendedor
         // se cancela la transacción
-        Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1500F)
+        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1500F)
         val transactionBuy = userService.beginTransaction(anotherUser.id!!, intentionBuy.id!!, defaultClock)
         assertNotNull(transactionBuy.id)
         assertEquals(transactionBuy.status, TransactionStatus.CANCELED)
@@ -246,6 +249,44 @@ class TransactionServiceTest {
         assertEquals(TransactionStatus.CANCELED, transactionUpdated.status)
     }
 
+
+    @Test
+    fun testGetVolumeOperated() {
+        val startDate = LocalDateTime.now().minusDays(7)
+        val endDate = LocalDateTime.now()
+
+        val user = userService.createUser(userToCreate)
+        val anotherUser = userService.createUser(anotherUserToCreate)
+
+        val anIntention = intentionService.createIntention(
+            CryptoCurrencyEnum.ETHUSDT,
+            2.0,
+            1000.0,
+            user.id!!,
+            OperationEnum.BUY
+        )
+
+        val anotherIntention = intentionService.createIntention(
+            CryptoCurrencyEnum.ETHUSDT,
+            2.0,
+            200.0,
+            anotherUser.id!!,
+            OperationEnum.SELL
+        )
+        val aTransaction = userService.beginTransaction(anotherUser.id!!, anIntention.id!!, defaultClock)
+        val anotherTransaction = userService.beginTransaction(user.id!!, anotherIntention.id!!, defaultClock)
+
+        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1000F)
+        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.MATICUSDT)).thenReturn(30000F)
+        `when`(cryptoService.getCryptoCurrencyValueUSDTtoARS()).thenReturn(BigDecimal.valueOf(78.5))
+
+        val result = transactionService.getVolumeOperated(user.id!!, startDate, endDate)
+
+        assertNotNull(result)
+        //assertEquals(result.totalUSD, BigDecimal("40000.0"))
+        //assertEquals(result.totalARS, BigDecimal("12000000.0"))
+
+    }
     @AfterEach
     fun cleanUp() {
         intentionService.deleteAll()
