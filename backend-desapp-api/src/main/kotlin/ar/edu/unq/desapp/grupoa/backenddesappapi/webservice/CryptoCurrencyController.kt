@@ -91,4 +91,8 @@ class CryptoCurrencyController {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(listOf("Error: Incorrect cryptocurrency symbol"))
         }
     }
+    @GetMapping("/quotes-every-10-minutes")
+    fun getCryptoQuotesEvery10Minutes(): Map<String, List<String>> {
+        return cryptoCurrencyService.showCryptoAssetQuotesEvery10Minutes()
+    }
 }
