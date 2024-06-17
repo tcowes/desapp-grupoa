@@ -19,6 +19,15 @@ class BinanceApiImpl : BinanceApi {
         }
     }
 
+    override fun showCryptoAssetQuotes(): Map<String, Float?> {
+        val url = "https://api.binance.com/api/v3/ticker/price"
+        val (_, _, result) = url.httpGet().responseString()
+        return when (result) {
+            is Result.Success -> parseCryptoAssetQuotes(result.get())
+            is Result.Failure -> throw RuntimeException("Error getting crypto asset quotes: ${result.error}")
+        }
+    }
+
     override fun getCryptoCurrencyValueHistory(symbol: String, hours: Int): List<Map<String, String>> {
         val endTime = Instant.now().toEpochMilli()
         val startTime = endTime - hours * 60 * 60 * 1000
@@ -42,5 +51,17 @@ class BinanceApiImpl : BinanceApi {
             historyData.add(entry)
         }
         return historyData
+    }
+
+    private fun parseCryptoAssetQuotes(response: String): Map<String, Float?> {
+        val quotesMap = mutableMapOf<String, Float?>()
+        val dataArray = JSONArray(response)
+        for (i in 0 until dataArray.length()) {
+            val jsonObject = dataArray.getJSONObject(i)
+            val symbol = jsonObject.getString("symbol")
+            val price = jsonObject.getString("price").toFloatOrNull()
+            quotesMap[symbol] = price
+        }
+        return quotesMap
     }
 }

@@ -5,6 +5,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -24,16 +25,23 @@ class CryptoCurrencyServiceImpl : CryptoService {
     }
 
     override fun showCryptoAssetQuotes(): Map<String, Float?> {
-        val cryptoassets = CryptoCurrencyEnum.entries
-        val quotes = emptyMap<String, Float?>().toMutableMap()
-        for (cryptoasset in cryptoassets) {
-            try {
-                quotes[cryptoasset.name] = binanceApi.getCryptoCurrencyValue(cryptoasset.name)
-            } catch (e: Exception) {
-                quotes[cryptoasset.name] = null
-            }
+        return try {
+            val allQuotes = binanceApi.showCryptoAssetQuotes()
+            val cryptoAssets = CryptoCurrencyEnum.values().map { it.name }
+            allQuotes.filterKeys { it in cryptoAssets }
+        } catch (e: Exception) {
+            emptyMap()
         }
-        return quotes
+
+    }
+
+    override fun getCryptoCurrencyValueUSDTtoARS(): BigDecimal? {
+        return try {
+            val value = binanceApi.getCryptoCurrencyValue("USDTARS").toString()
+            BigDecimal(value)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     override fun showCryptoAssetQuotesLast24Hours(cryptoCurrency: CryptoCurrencyEnum): List<String> {

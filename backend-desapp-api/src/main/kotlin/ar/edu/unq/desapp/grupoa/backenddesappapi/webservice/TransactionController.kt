@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -27,7 +28,7 @@ class TransactionController {
             ResponseEntity.status(HttpStatus.OK)
                 .body(transactionService.getVolumeOperated(userId, start, end))
         } catch (e: DateTimeParseException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid date format. Please use 'YYYY-MM-DDTHH:MM:SS'")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid date format. Please use 'YYYY-MM-DDTHH:MM:SS'", e)
         }
     }
 }
