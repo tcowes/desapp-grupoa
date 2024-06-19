@@ -33,6 +33,8 @@ val tngtechVersion = "1.0.1"
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	// implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("javax.validation:validation-api:${javaxValidationVersion}")
 	implementation("org.hibernate.validator:hibernate-validator")
