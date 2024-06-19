@@ -1,8 +1,10 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
+import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.ExposedUserDTO
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.TransactionDTO
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.UserDTO
 import io.swagger.v3.oas.annotations.Operation
@@ -63,9 +65,10 @@ class UserController {
         ]
     )
     @PostMapping("/register")
-    fun register(@Valid @RequestBody userData: UserDTO): ResponseEntity<String> {
+    fun register(@Valid @RequestBody userData: UserDTO): ResponseEntity<Any> {
+        lateinit var user: User
         try {
-            userService.createUser(userData.toModel())
+            user = userService.createUser(userData.toModel())
         } catch (ex: Throwable) {
             when (ex) {
                 is ErrorCreatingUserException, is UserAlreadyRegisteredException ->
@@ -73,7 +76,7 @@ class UserController {
             }
         }
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body("Welcome ${userData.name} ${userData.surname}! You've been successfully registered.")
+            .body(ExposedUserDTO.fromModel(user))
     }
 
     @Operation(

@@ -64,9 +64,15 @@ class UserControllerTest {
                 .content(parsedUserData)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
-            .andExpect(
-                MockMvcResultMatchers.content().string("Welcome Satoshi Nakamoto! You've been successfully registered.")
-            )
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Satoshi"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.surname").value("Nakamoto"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("satonaka@gmail.com"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.address").value("Shibuya 123"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cvu").value("0011223344556677889911"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.walletAddress").value("12345678"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.password").doesNotExist())
     }
 
     @Test
@@ -130,6 +136,8 @@ class UserControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userId").isNumber)
             .andExpect(MockMvcResultMatchers.jsonPath("$.cryptoactive").value("BTCUSDT"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.amountOfCrypto").value(2.0))
             .andExpect(MockMvcResultMatchers.jsonPath("$.lastQuotation").value(1000.0))
@@ -182,6 +190,8 @@ class UserControllerTest {
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userId").isNumber)
             .andExpect(MockMvcResultMatchers.jsonPath("$.cryptoactive").value("BTCUSDT"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.amountOfCrypto").value(2.0))
             .andExpect(MockMvcResultMatchers.jsonPath("$.lastQuotation").value(1100.0))

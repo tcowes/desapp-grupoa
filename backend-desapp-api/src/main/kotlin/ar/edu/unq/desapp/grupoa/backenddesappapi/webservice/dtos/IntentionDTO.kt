@@ -14,6 +14,8 @@ data class CreationIntentionDTO(
 )
 
 data class IntentionDTO(
+    val id: Long?,
+    val userId: Long?,
     val cryptoactive: CryptoCurrencyEnum,
     val amountOfCrypto: Double,
     val lastQuotation: Double,
@@ -36,6 +38,8 @@ data class IntentionDTO(
                 totalTransactions / intention.user.reputation
             }
             return IntentionDTO(
+                intention.id,
+                intention.user.id,
                 intention.cryptoactive,
                 intention.amountOfCrypto,
                 intention.lastQuotation,
