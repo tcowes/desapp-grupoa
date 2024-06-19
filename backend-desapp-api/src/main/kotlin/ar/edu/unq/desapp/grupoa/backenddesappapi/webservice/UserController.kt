@@ -1,6 +1,6 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.TransactionDTO
@@ -68,7 +68,7 @@ class UserController {
             userService.createUser(userData.toModel())
         } catch (ex: Throwable) {
             when (ex) {
-                is ErrorCreatingUser, is UserAlreadyRegisteredException ->
+                is ErrorCreatingUserException, is UserAlreadyRegisteredException ->
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
             }
         }

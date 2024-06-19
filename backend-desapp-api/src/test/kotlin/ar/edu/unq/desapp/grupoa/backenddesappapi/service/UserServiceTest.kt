@@ -2,7 +2,7 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUser
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
@@ -165,7 +165,7 @@ class UserServiceTest {
     @ParameterizedTest
     @MethodSource("invalidUsers")
     fun cantRegisterUsersWithInvalidData(user: User, expectedMessage: String) {
-        val error = assertThrows<ErrorCreatingUser> {
+        val error = assertThrows<ErrorCreatingUserException> {
             userService.createUser(user)
         }
         assertEquals(expectedMessage, error.message)

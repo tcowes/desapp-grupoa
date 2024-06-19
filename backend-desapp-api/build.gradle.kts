@@ -28,6 +28,7 @@ val springDocVersion = "2.2.0"
 val githubFuelVersion = "2.3.1"
 val jsonVersion = "20210307"
 val hsqlVersion = "2.7.1"
+val tngtechVersion = "1.0.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -47,6 +48,7 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("com.tngtech.archunit:archunit:${tngtechVersion}")
 	// testImplementation("org.springframework.security:spring-security-test")
 
 }
