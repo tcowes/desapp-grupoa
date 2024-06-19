@@ -77,16 +77,14 @@ class CryptoCurrencyServiceImpl : CryptoService {
                 val cacheKey = crypto.name
                 val cachedData = cache.getIfPresent(cacheKey)
                 val now = LocalDateTime.now()
-                val dataFirstInterval: List<Map<String, String>>
-                val dataSecondInterval: List<Map<String, String>>
                 val combinedData: List<Map<String, String>>
 
                 if (cachedData != null && cachedData.first.plusMinutes(10).isAfter(now)) {
                     combinedData = cachedData.second
                 } else {
-                    dataFirstInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
-                    dataSecondInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
-                    combinedData = combineData(dataFirstInterval, dataSecondInterval)
+                    val dataFirstInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
+                    val dataSecondInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
+                    combinedData = combineDataEvery10Minutes(dataFirstInterval + dataSecondInterval)
                     cache.put(cacheKey, now to combinedData)
                 }
 
@@ -105,25 +103,29 @@ class CryptoCurrencyServiceImpl : CryptoService {
         return quotesByCrypto
     }
 
-    fun combineData(data1: List<Map<String, String>>, data2: List<Map<String, String>>): List<Map<String, String>> {
+    fun combineDataEvery10Minutes(data: List<Map<String, String>>): List<Map<String, String>> {
         val combinedData = mutableListOf<Map<String, String>>()
-        val data2Map = data2.associateBy { it["timestamp"] }
 
-        for (item1 in data1) {
-            val timestamp1 = item1["timestamp"]
-            val price1 = item1["price"]?.toFloatOrNull() ?: continue
+        for (i in data.indices step 2) {
+            if (i + 1 < data.size) {
+                val item1 = data[i]
+                val item2 = data[i + 1]
 
-            val item2 = data2Map[timestamp1]
-            if (item2 != null) {
-                val price2 = item2["price"]?.toFloatOrNull() ?: continue
-                val averagePrice = (price1 + price2) / 2
+                val timestamp1 = item1["timestamp"]
+                val timestamp2 = item2["timestamp"]
 
-                val combinedItem = mapOf(
-                    "timestamp" to timestamp1!!,
-                    "price" to averagePrice.toString()
-                )
+                if (timestamp1 != null && timestamp2 != null) {
+                    val price1 = item1["price"]?.toFloatOrNull() ?: continue
+                    val price2 = item2["price"]?.toFloatOrNull() ?: continue
+                    val averagePrice = (price1 + price2) / 2
 
-                combinedData.add(combinedItem)
+                    val combinedItem = mapOf(
+                        "timestamp" to timestamp1,
+                        "price" to averagePrice.toString()
+                    )
+
+                    combinedData.add(combinedItem)
+                }
             }
         }
 
