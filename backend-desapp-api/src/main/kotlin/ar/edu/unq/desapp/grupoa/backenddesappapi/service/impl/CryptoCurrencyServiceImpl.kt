@@ -3,17 +3,24 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service.impl
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 @Service
 class CryptoCurrencyServiceImpl : CryptoService {
 
     @Autowired
     private lateinit var binanceApi: BinanceApi
+
+    val cache: Cache<String, Pair<LocalDateTime, List<Map<String, String>>>> = Caffeine.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build()
 
 
     override fun getCryptoQuote(cryptoActiveName: CryptoCurrencyEnum): Float? {
@@ -66,10 +73,22 @@ class CryptoCurrencyServiceImpl : CryptoService {
             val cryptoAssets = CryptoCurrencyEnum.values()
             for (crypto in cryptoAssets) {
                 val quotes = mutableListOf<String>()
-                val dataFirstInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
-                val dataSecondInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
 
-                val combinedData = combineData(dataFirstInterval, dataSecondInterval)
+                val cacheKey = crypto.name
+                val cachedData = cache.getIfPresent(cacheKey)
+                val now = LocalDateTime.now()
+                val dataFirstInterval: List<Map<String, String>>
+                val dataSecondInterval: List<Map<String, String>>
+                val combinedData: List<Map<String, String>>
+
+                if (cachedData != null && cachedData.first.plusMinutes(10).isAfter(now)) {
+                    combinedData = cachedData.second
+                } else {
+                    dataFirstInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
+                    dataSecondInterval = binanceApi.getCryptoCurrencyValueHistory(crypto.name, "5m", 12)
+                    combinedData = combineData(dataFirstInterval, dataSecondInterval)
+                    cache.put(cacheKey, now to combinedData)
+                }
 
                 quotes.add("Quotes every 10 minutes for ${crypto.name}:")
                 for (quote in combinedData) {
@@ -86,32 +105,26 @@ class CryptoCurrencyServiceImpl : CryptoService {
         return quotesByCrypto
     }
 
-
     fun combineData(data1: List<Map<String, String>>, data2: List<Map<String, String>>): List<Map<String, String>> {
-        if (data1.size != data2.size) {
-            throw IllegalArgumentException("Los datos de los intervalos no tienen la misma longitud")
-        }
-
         val combinedData = mutableListOf<Map<String, String>>()
+        val data2Map = data2.associateBy { it["timestamp"] }
 
-        for (i in data1.indices) {
-            val timestamp1 = data1[i]["timestamp"]
-            val timestamp2 = data2[i]["timestamp"]
+        for (item1 in data1) {
+            val timestamp1 = item1["timestamp"]
+            val price1 = item1["price"]?.toFloatOrNull() ?: continue
 
-            if (timestamp1 != timestamp2) {
-                throw IllegalArgumentException("Los timestamps de los datos no coinciden")
+            val item2 = data2Map[timestamp1]
+            if (item2 != null) {
+                val price2 = item2["price"]?.toFloatOrNull() ?: continue
+                val averagePrice = (price1 + price2) / 2
+
+                val combinedItem = mapOf(
+                    "timestamp" to timestamp1!!,
+                    "price" to averagePrice.toString()
+                )
+
+                combinedData.add(combinedItem)
             }
-
-            val price1 = data1[i]["price"]?.toFloatOrNull() ?: continue
-            val price2 = data2[i]["price"]?.toFloatOrNull() ?: continue
-            val averagePrice = (price1 + price2) / 2
-
-            val combinedItem = mapOf(
-                "timestamp" to timestamp1!!,
-                "price" to averagePrice.toString()
-            )
-
-            combinedData.add(combinedItem)
         }
 
         return combinedData
