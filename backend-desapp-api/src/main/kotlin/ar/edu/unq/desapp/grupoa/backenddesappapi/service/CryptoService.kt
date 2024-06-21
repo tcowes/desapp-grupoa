@@ -8,5 +8,6 @@ interface CryptoService {
     fun showCryptoAssetQuotes(): Map<String, Float?>
     fun getCryptoCurrencyValueUSDTtoARS() : BigDecimal?
     fun showCryptoAssetQuotesLast24Hours(cryptoCurrency: CryptoCurrencyEnum): List<String>
+    fun showCryptoAssetQuotesEvery10Minutes(): Map<String, List<String>>
 
 }
