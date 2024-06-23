@@ -82,6 +82,14 @@ tasks.jacocoTestReport {
 		csv.required.set(false)
 		html.required.set(false)
 	}
+
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it).matching {
+				exclude("ar/edu/unq/desapp/grupoa/backenddesappapi/service/integration")
+			}
+		})
+	)
 }
 
 jacoco {

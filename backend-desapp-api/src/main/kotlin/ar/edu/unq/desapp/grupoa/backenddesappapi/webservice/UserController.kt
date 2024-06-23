@@ -70,10 +70,7 @@ class UserController {
         try {
             user = userService.createUser(userData.toModel())
         } catch (ex: Throwable) {
-            when (ex) {
-                is ErrorCreatingUserException, is UserAlreadyRegisteredException ->
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
-            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
         }
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ExposedUserDTO.fromModel(user))
@@ -125,7 +122,7 @@ class UserController {
     fun createTransaction(
         @PathVariable userId: Long,
         @PathVariable intentionId: Long
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Any> {  // TODO: SEGURIZAR
         return try {
             val user = userService.getUserById(userId)
             val dto = TransactionDTO.fromModel(userService.beginTransaction(userId, intentionId, defaultClock), user)

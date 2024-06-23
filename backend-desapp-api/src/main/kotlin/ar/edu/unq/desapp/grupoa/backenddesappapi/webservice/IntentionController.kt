@@ -72,7 +72,7 @@ class IntentionController {
         ]
     )
     @PostMapping("/create")
-    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<Any> {
+    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<Any> {  // TODO: SEGURIZAR
         lateinit var intentionCreated: Intention
         try {
             intentionCreated = intentionService.createIntention(
@@ -115,7 +115,7 @@ class IntentionController {
         ]
     )
     @GetMapping("/all-active")
-    fun listActiveIntentios(): List<IntentionDTO> {
+    fun listActiveIntentions(): List<IntentionDTO> {
         return intentionService.listActiveIntentions().map { IntentionDTO.fromModel(it) }
     }
 }
