@@ -1,8 +1,6 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.ExposedUserDTO
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.TransactionDTO
@@ -118,7 +116,7 @@ class UserController {
             )
         ]
     )
-    @PostMapping("/{userId}/createTransaction/{intentionId}")
+    @PostMapping("/{userId}/create-transaction/{intentionId}")
     fun createTransaction(
         @PathVariable userId: Long,
         @PathVariable intentionId: Long
@@ -128,6 +126,58 @@ class UserController {
             val dto = TransactionDTO.fromModel(userService.beginTransaction(userId, intentionId, defaultClock), user)
             ResponseEntity.status(HttpStatus.CREATED)
                 .body(dto)
+        } catch (ex: EntityNotFoundException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body("${ex.message}")
+        } catch (ex: Throwable) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
+        }
+    }
+
+
+    @Operation(
+        summary = "Finish a transaction",
+        description = "Finish a transaction",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Success",
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Bad Request",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        examples = [ExampleObject(
+                            value = "A error"
+                        )]
+                    )
+                ]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Not Found",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        examples = [ExampleObject(
+                            value = "A error"
+                        )]
+                    )
+                ]
+            )
+        ]
+    )
+    @PostMapping("/{userId}/finish-transaction/{transactionId}")
+    fun finishTransaction(
+        @PathVariable userId: Long,
+        @PathVariable transactionId: Long
+    ): ResponseEntity<Any> {  // TODO: SEGURIZAR
+        return try {
+            userService.finishTransaction(userId, transactionId, defaultClock)
+            ResponseEntity.status(HttpStatus.OK).body("Transaction successfully finished!")
         } catch (ex: EntityNotFoundException) {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("${ex.message}")
         } catch (ex: Throwable) {
