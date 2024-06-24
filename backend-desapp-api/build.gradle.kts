@@ -42,6 +42,7 @@ dependencies {
 	implementation("com.github.kittinunf.fuel:fuel:${githubFuelVersion}")
 	implementation ("org.json:json:${jsonVersion}")
 	implementation ("com.github.ben-manes.caffeine:caffeine:3.0.4")
+	implementation ("org.springframework.boot:spring-boot-starter-actuator")
 
 	providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
 	runtimeOnly("org.hsqldb:hsqldb:${hsqlVersion}")
