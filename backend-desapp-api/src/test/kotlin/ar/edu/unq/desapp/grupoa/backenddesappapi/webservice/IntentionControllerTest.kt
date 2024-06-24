@@ -68,7 +68,18 @@ class IntentionControllerTest {
                 .content(parsedIntentionData)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
-            .andExpect(MockMvcResultMatchers.content().string("Intention created successfully"))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userId").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cryptoactive").value("BTCUSDT"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.amountOfCrypto").value(1.5))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.lastQuotation").value(1000.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.amountInPesos").value(1627500.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userFirstName").value("Satoshi"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userLastName").value("Nakamoto"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userAmountOfTransactions").value(0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userReputation").value(0.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.dateCreated").isNotEmpty)
     }
 
     @Test
@@ -146,6 +157,8 @@ class IntentionControllerTest {
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$").isArray)
             .andExpect(MockMvcResultMatchers.jsonPath("$[0]").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].userId").isNumber)
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].cryptoactive").value("BTCUSDT"))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].amountOfCrypto").value(2.0))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].lastQuotation").value(1000.0))

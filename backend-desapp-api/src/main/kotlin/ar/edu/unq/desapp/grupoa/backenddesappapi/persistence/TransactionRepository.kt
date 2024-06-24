@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @Repository
 interface TransactionRepository : JpaRepository<Transaction, Long>{
-    @Query("SELECT t FROM Transaction t WHERE (t.seller.id = :userId OR t.buyer.id = :userId) AND t.createdAt BETWEEN :startDate AND :endDate")
+    @Query("SELECT t FROM Transaction t WHERE (t.seller.id = :userId OR t.buyer.id = :userId) AND t.createdAt BETWEEN :startDate AND :endDate AND t.status = 'COMPLETED'")
     fun findByUserIdAndDateRange(
         @Param("userId") userId: Long,
         @Param("startDate") startDate: LocalDateTime,

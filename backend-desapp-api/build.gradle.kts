@@ -28,10 +28,13 @@ val springDocVersion = "2.2.0"
 val githubFuelVersion = "2.3.1"
 val jsonVersion = "20210307"
 val hsqlVersion = "2.7.1"
+val tngtechVersion = "1.0.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	// implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("io.micrometer:micrometer-registry-prometheus")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("javax.validation:validation-api:${javaxValidationVersion}")
 	implementation("org.hibernate.validator:hibernate-validator")
@@ -48,6 +51,7 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("com.tngtech.archunit:archunit:${tngtechVersion}")
 	// testImplementation("org.springframework.security:spring-security-test")
 
 }
@@ -79,6 +83,14 @@ tasks.jacocoTestReport {
 		csv.required.set(false)
 		html.required.set(false)
 	}
+
+	classDirectories.setFrom(
+		files(classDirectories.files.map {
+			fileTree(it).matching {
+				exclude("ar/edu/unq/desapp/grupoa/backenddesappapi/service/integration")
+			}
+		})
+	)
 }
 
 jacoco {

@@ -38,7 +38,7 @@ class IntentionServiceImpl : IntentionService {
             crypto,
             quantity,
             price,
-            quantity * price * 1085, // TODO: 1085 es un valor actual del dolar, habría que saberlo en el momento
+            quantity * price * 1085,  // Valor simbolico del dolar, lo ideal sería traerlo actualizado de alguna api externa
             user,
             operation,
             LocalDateTime.now(),

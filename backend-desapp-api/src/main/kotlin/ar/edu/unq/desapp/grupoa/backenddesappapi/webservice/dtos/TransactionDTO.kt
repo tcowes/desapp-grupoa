@@ -3,6 +3,8 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
 
 data class TransactionDTO(
+    val id: Long?,
+    val userId: Long?,
     val cryptoactive: CryptoCurrencyEnum,
     val amountOfCrypto: Double,
     val lastQuotation: Double,
@@ -37,6 +39,8 @@ data class TransactionDTO(
                 action = "Please confirm reception"
             }
             return TransactionDTO(
+                transaction.id,
+                user.id,
                 transaction.cryptocurrency,
                 transaction.amount,
                 transaction.price,

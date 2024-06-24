@@ -31,3 +31,27 @@ data class UserDTO(
         return User(this.name, this.surname, this.email, this.address, this.password, this.cvu, this.walletAddress)
     }
 }
+
+data class ExposedUserDTO(
+    val id: Long?,
+    val name: String,
+    val surname: String,
+    val email: String,
+    val address: String,
+    val cvu: String,
+    val walletAddress: String
+) {
+    companion object {
+        fun fromModel(user: User): ExposedUserDTO {
+            return ExposedUserDTO(
+                user.id,
+                user.name,
+                user.surname,
+                user.email,
+                user.address,
+                user.cvu,
+                user.walletAddress
+            )
+        }
+    }
+}

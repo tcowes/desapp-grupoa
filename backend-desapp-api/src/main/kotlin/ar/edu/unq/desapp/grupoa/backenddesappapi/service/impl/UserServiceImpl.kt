@@ -42,7 +42,7 @@ class UserServiceImpl : UserService {
                 is InvalidPasswordException,
                 is InvalidEmailException,
                 is BadAddressException,
-                is BadBankDataException -> throw ErrorCreatingUser(ex.message!!)
+                is BadBankDataException -> throw ErrorCreatingUserException(ex.message!!)
 
                 else -> throw ex
             }

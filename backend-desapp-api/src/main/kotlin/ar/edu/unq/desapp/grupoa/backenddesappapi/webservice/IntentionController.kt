@@ -1,5 +1,6 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.webservice
 
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.Intention
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.OutOfRangePriceException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsIntention.UsernameIntentException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
@@ -71,9 +72,10 @@ class IntentionController {
         ]
     )
     @PostMapping("/create")
-    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<String> {
+    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<Any> {  // TODO: SEGURIZAR
+        lateinit var intentionCreated: Intention
         try {
-            intentionService.createIntention(
+            intentionCreated = intentionService.createIntention(
                 intention.cryptoactive,
                 intention.amountOfCrypto,
                 intention.lastQuotation,
@@ -91,7 +93,7 @@ class IntentionController {
                         .body("Failed to create intention: ${ex.message}")
             }
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body("Intention created successfully")
+        return ResponseEntity.status(HttpStatus.CREATED).body(IntentionDTO.fromModel(intentionCreated))
     }
 
     @Operation(
@@ -113,7 +115,7 @@ class IntentionController {
         ]
     )
     @GetMapping("/all-active")
-    fun listActiveIntentios(): List<IntentionDTO> {
+    fun listActiveIntentions(): List<IntentionDTO> {
         return intentionService.listActiveIntentions().map { IntentionDTO.fromModel(it) }
     }
 }
