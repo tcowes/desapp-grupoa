@@ -13,10 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import org.slf4j.LoggerFactory
 
 @Service
 @Transactional
 class IntentionServiceImpl : IntentionService {
+
+    private val logger = LoggerFactory.getLogger(IntentionService::class.java)
+
     @Autowired
     private lateinit var intentionRepository: IntentionRepository
 
@@ -33,6 +37,7 @@ class IntentionServiceImpl : IntentionService {
         userId: Long,
         operation: OperationEnum
     ): Intention {
+        logger.info("Creating new intent for cryptocurrency $crypto, amount: $quantity, price: $price, user ID: $userId, operation: $operation")
         val user = userRepository.findById(userId).orElseThrow { UsernameIntentException(userId) }
         val intention = Intention(
             crypto,
@@ -43,9 +48,15 @@ class IntentionServiceImpl : IntentionService {
             operation,
             LocalDateTime.now(),
         )
+        logger.debug("Created intention")
         val actualPriceForCrypto: Float? = cryptoService.getCryptoQuote(crypto)
         intention.validateIntentionData(actualPriceForCrypto)
-        return intentionRepository.save(intention)
+        logger.debug("Intent data successfully validated")
+        val savedIntention = intentionRepository.save(intention)
+
+        logger.info("Successfully created and saved intent: $savedIntention")
+
+        return savedIntention
     }
 
     override fun updateIntention(intention: Intention): Intention {
