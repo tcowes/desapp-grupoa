@@ -145,6 +145,18 @@ class IntentionControllerTest {
     }
 
     @Test
+    fun intentionActiveListReturns200WithEmptyList() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/intentions/all-active")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty)
+    }
+
+    @Test
     fun intentionActiveListReturns200() {
         intentionService.createIntention(
             CryptoCurrencyEnum.BTCUSDT,

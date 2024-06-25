@@ -71,6 +71,7 @@ sonar {
             "sonar.coverage.jacoco.xmlReportPaths",
             "$buildDir\\backend-desapp_api\\reports\\jacoco\\test\\jacocoTestReport.xml"
         )
+        property("sonar.coverage.exclusions", "**/service/integration/**,**/webservice/security/**")
     }
 }
 
