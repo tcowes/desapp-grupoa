@@ -11,9 +11,12 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
+import org.slf4j.LoggerFactory
 
 @Service
 class CryptoCurrencyServiceImpl : CryptoService {
+
+    private val logger = LoggerFactory.getLogger(CryptoService::class.java)
 
     @Autowired
     private lateinit var binanceApi: BinanceApi
@@ -52,6 +55,7 @@ class CryptoCurrencyServiceImpl : CryptoService {
     }
 
     override fun showCryptoAssetQuotesLast24Hours(cryptoCurrency: CryptoCurrencyEnum): List<String> {
+        logger.info("Trying to get crypto asset quotes in the last 24 hours to ${cryptoCurrency.name}")
         val quotes = mutableListOf<String>()
         try {
             val data = binanceApi.getCryptoCurrencyValueHistory(cryptoCurrency.name, "1h", 24)
@@ -63,6 +67,7 @@ class CryptoCurrencyServiceImpl : CryptoService {
             }
         } catch (e: Exception) {
             quotes.add("Error getting quotes for ${cryptoCurrency.name}: ${e.message}")
+            logger.error("Error getting quotes for${cryptoCurrency.name}: ${e.message}", e)
         }
         return quotes
     }
