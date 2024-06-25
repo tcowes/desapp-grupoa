@@ -7,6 +7,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.IntentionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.dto.UserDetailsDTO
 import jakarta.persistence.EntityNotFoundException
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
+import org.slf4j.LoggerFactory
 
 @Service
 @Transactional
@@ -25,6 +27,8 @@ class UserServiceImpl(
     private val transactionRepository: TransactionRepository,
     private val cryptoService: CryptoService
 ) : UserService {
+
+    private val logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
 
     // Para evitar dependencias circulares, instanciamos el passwordEncoder acá:
     private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
@@ -47,40 +51,59 @@ class UserServiceImpl(
                 else -> throw ex
             }
         }
-        if (userRepository.existsByEmail(user.email)) throw UserAlreadyRegisteredException("email", user.email)
-        if (userRepository.existsByCvu(user.cvu)) throw UserAlreadyRegisteredException("cvu", user.cvu)
-        if (userRepository.existsByWalletAddress(user.walletAddress)) throw UserAlreadyRegisteredException(
-            "wallet",
-            user.walletAddress
-        )
-        user.password = passwordEncoder.encode(user.password)
+        if (userRepository.existsByEmail(user.email)) {
+            logger.warn("Attempt to create user failed: There is already a registered user with the email ${user.email}")
+            throw UserAlreadyRegisteredException("email", user.email)
+        }
+
+        if (userRepository.existsByCvu(user.cvu)) {
+            logger.warn("Attempt to create user failed: There is already a user registered with the cvu ${user.cvu}")
+            throw UserAlreadyRegisteredException("cvu", user.cvu)
+        }
+        if (userRepository.existsByWalletAddress(user.walletAddress)) {
+            logger.warn("Attempt to create user failed: A registered user already exists with that wallet address ${user.walletAddress}")
+            throw UserAlreadyRegisteredException(
+                "wallet",
+                user.walletAddress
+            )
+        }
+        logger.info("User created successfully")
         return userRepository.save(user)
     }
 
     override fun login(email: String, password: String): User {
+      //  logger.info("Attempting to log in with email: {}", email)
         val user = userRepository.findByEmail(email)
             ?: throw EntityNotFoundException("User not found with email: $email")
         if (!passwordEncoder.matches(password, user.password)) {
+      //      logger.warn("Wrong password for user with email: {}", email)
             throw WrongPasswordException()
         }
+      //  logger.warn("Wrong password for user with email: {}", email)
         return user
     }
 
     override fun beginTransaction(userId: Long, intentionId: Long, clock: Clock?): Transaction {
+        logger.info("Starting transaction for user with ID: $userId and the intent with ID: $intentionId")
         val user = getUserById(userId)
         val intention = intentionRepository.findById(intentionId)
             .orElseThrow { EntityNotFoundException("User not found with id: $intentionId") }
+        logger.debug("Found intention")
         val actualPriceForCrypto = cryptoService.getCryptoQuote(intention.cryptoactive)
         val transaction = user.beginTransaction(intention!!, actualPriceForCrypto!!.toDouble(), clock)
+        logger.info("Transaction saved successfully")
         return transactionRepository.save(transaction)
     }
 
     override fun finishTransaction(userId: Long, transactionId: Long, clock: Clock?) {
+        logger.info("Initiating transaction completion for user with ID: $userId and the transaction with ID: $transactionId")
         val user = getUserById(userId)
         val transaction = transactionRepository.findById(transactionId)
             .orElseThrow { EntityNotFoundException("User not found with id: $transactionId") }
+        logger.debug("Transaction found")
         user.finishTransaction(transaction, clock)
         userRepository.save(user)
+        logger.info("Transaction completed successfully for user with ID: $userId")
     }
 
     override fun listUsers(): Map<String, List<String>> {
