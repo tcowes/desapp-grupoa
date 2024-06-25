@@ -72,7 +72,7 @@ class IntentionController {
         ]
     )
     @PostMapping("/create")
-    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<Any> {  // TODO: SEGURIZAR
+    fun createIntention(@Valid @RequestBody intention: CreationIntentionDTO): ResponseEntity<Any> {
         lateinit var intentionCreated: Intention
         try {
             intentionCreated = intentionService.createIntention(
