@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -56,6 +57,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionCorrectlySubmittedReturns201Created() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 1000.0, userId!!, OperationEnum.BUY
@@ -83,6 +85,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithExceededPriceReturns400BadRequest() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 2000.0, userId!!, OperationEnum.BUY
@@ -102,6 +105,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithLowPriceReturns400BadRequest() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 500.0, userId!!, OperationEnum.BUY
@@ -121,6 +125,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithNonExistentUserIdReturns404NotFound() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 1000.0, 999, OperationEnum.BUY
@@ -137,6 +142,18 @@ class IntentionControllerTest {
                 MockMvcResultMatchers.content()
                     .string("Didn't found any user with id 999")
             )
+    }
+
+    @Test
+    fun intentionActiveListReturns200WithEmptyList() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/intentions/all-active")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty)
     }
 
     @Test

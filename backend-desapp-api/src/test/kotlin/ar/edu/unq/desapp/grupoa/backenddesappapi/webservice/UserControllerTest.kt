@@ -8,12 +8,14 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.service.IntentionService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.TransactionService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.dtos.UserDTO
+import ar.edu.unq.desapp.grupoa.backenddesappapi.webservice.security.JwtUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -59,7 +61,7 @@ class UserControllerTest {
         val parsedUserData = ObjectMapper().writeValueAsString(userData)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/register")
+            MockMvcRequestBuilders.post("/users/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(parsedUserData)
         )
@@ -89,7 +91,7 @@ class UserControllerTest {
         val parsedUserData = ObjectMapper().writeValueAsString(userData)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/register")
+            MockMvcRequestBuilders.post("/users/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(parsedUserData)
         )
@@ -110,14 +112,14 @@ class UserControllerTest {
         val parsedUserData = ObjectMapper().writeValueAsString(userData)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/register")
+            MockMvcRequestBuilders.post("/users/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(parsedUserData)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/register")
+            MockMvcRequestBuilders.post("/users/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(parsedUserData)
         )
@@ -126,6 +128,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun userCreatesTransactionCorrectlyAsSellerAndReturns201Created() {
         val user = userService.createUser(
             User(
@@ -160,7 +163,7 @@ class UserControllerTest {
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -179,6 +182,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun userCreatesTransactionCorrectlyAsBuyerAndReturns201Created() {
         val user = userService.createUser(
             User(
@@ -213,7 +217,7 @@ class UserControllerTest {
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -223,6 +227,7 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun userCreatesTransactionCorrectlyButItAutomaticallyCancels() {
         val user = userService.createUser(
             User(
@@ -258,7 +263,7 @@ class UserControllerTest {
 
         Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.BTCUSDT)).thenReturn(1100F)
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -277,9 +282,10 @@ class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun nonExistentUserCreatesTransactionAndReturns404() {
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/999/createTransaction/123465")
+            MockMvcRequestBuilders.post("/users/999/create-transaction/123465")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNotFound)
