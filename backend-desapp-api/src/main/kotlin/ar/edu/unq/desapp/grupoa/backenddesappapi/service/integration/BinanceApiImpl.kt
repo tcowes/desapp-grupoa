@@ -1,8 +1,10 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.ExternalApisMetricsService
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import org.json.JSONArray
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.ZoneOffset
@@ -10,6 +12,10 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class BinanceApiImpl : BinanceApi {
+
+    @Autowired
+    private lateinit var metricsService: ExternalApisMetricsService
+
     override fun getCryptoCurrencyValue(symbol: String): Float {
         val url = "https://api.binance.com/api/v3/ticker/price?symbol=$symbol"
         val (_, _, result) = url.httpGet().responseString()
@@ -21,7 +27,7 @@ class BinanceApiImpl : BinanceApi {
 
     override fun showCryptoAssetQuotes(): Map<String, Float?> {
         val url = "https://api.binance.com/api/v3/ticker/price"
-        val (_, _, result) = url.httpGet().responseString()
+        val (_, _, result) = metricsService.callExternalService { url.httpGet().responseString() }
         return when (result) {
             is Result.Success -> parseCryptoAssetQuotes(result.get())
             is Result.Failure -> throw RuntimeException("Error getting crypto asset quotes: ${result.error}")

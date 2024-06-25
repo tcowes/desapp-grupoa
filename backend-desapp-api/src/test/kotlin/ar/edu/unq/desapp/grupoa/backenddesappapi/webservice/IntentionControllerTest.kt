@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -56,6 +57,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionCorrectlySubmittedReturns201Created() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 1000.0, userId!!, OperationEnum.BUY
@@ -68,10 +70,22 @@ class IntentionControllerTest {
                 .content(parsedIntentionData)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
-            .andExpect(MockMvcResultMatchers.content().string("Intention created successfully"))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userId").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.cryptoactive").value("BTCUSDT"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.amountOfCrypto").value(1.5))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.lastQuotation").value(1000.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.amountInPesos").value(1627500.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userFirstName").value("Satoshi"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userLastName").value("Nakamoto"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userAmountOfTransactions").value(0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.userReputation").value(0.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.dateCreated").isNotEmpty)
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithExceededPriceReturns400BadRequest() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 2000.0, userId!!, OperationEnum.BUY
@@ -91,6 +105,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithLowPriceReturns400BadRequest() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 500.0, userId!!, OperationEnum.BUY
@@ -110,6 +125,7 @@ class IntentionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "user", roles = ["USER"])
     fun intentionWithNonExistentUserIdReturns404NotFound() {
         val intention = CreationIntentionDTO(
             CryptoCurrencyEnum.BTCUSDT, 1.5, 1000.0, 999, OperationEnum.BUY
@@ -126,6 +142,18 @@ class IntentionControllerTest {
                 MockMvcResultMatchers.content()
                     .string("Didn't found any user with id 999")
             )
+    }
+
+    @Test
+    fun intentionActiveListReturns200WithEmptyList() {
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/intentions/all-active")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isArray)
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty)
     }
 
     @Test
@@ -146,6 +174,8 @@ class IntentionControllerTest {
             .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.jsonPath("$").isArray)
             .andExpect(MockMvcResultMatchers.jsonPath("$[0]").exists())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNumber)
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].userId").isNumber)
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].cryptoactive").value("BTCUSDT"))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].amountOfCrypto").value(2.0))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].lastQuotation").value(1000.0))

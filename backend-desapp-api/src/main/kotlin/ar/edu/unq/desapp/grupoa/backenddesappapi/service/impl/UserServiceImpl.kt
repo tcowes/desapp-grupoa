@@ -8,26 +8,26 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.TransactionReposito
 import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.CryptoService
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.UserService
+import ar.edu.unq.desapp.grupoa.backenddesappapi.service.dto.UserDetailsDTO
 import jakarta.persistence.EntityNotFoundException
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
 
 @Service
 @Transactional
-class UserServiceImpl : UserService {
-    @Autowired
-    private lateinit var userRepository: UserRepository
+class UserServiceImpl(
+    private val userRepository: UserRepository,
+    private val intentionRepository: IntentionRepository,
+    private val transactionRepository: TransactionRepository,
+    private val cryptoService: CryptoService
+) : UserService {
 
-    @Autowired
-    private lateinit var intentionRepository: IntentionRepository
-
-    @Autowired
-    private lateinit var transactionRepository: TransactionRepository
-
-    @Autowired
-    private lateinit var cryptoService: CryptoService
+    // Para evitar dependencias circulares, instanciamos el passwordEncoder acá:
+    private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
 
     override fun getUserById(id: Long): User {
         return userRepository.findById(id).orElseThrow { EntityNotFoundException("User not found with id: $id") }
@@ -42,7 +42,7 @@ class UserServiceImpl : UserService {
                 is InvalidPasswordException,
                 is InvalidEmailException,
                 is BadAddressException,
-                is BadBankDataException -> throw ErrorCreatingUser(ex.message!!)
+                is BadBankDataException -> throw ErrorCreatingUserException(ex.message!!)
 
                 else -> throw ex
             }
@@ -53,7 +53,17 @@ class UserServiceImpl : UserService {
             "wallet",
             user.walletAddress
         )
+        user.password = passwordEncoder.encode(user.password)
         return userRepository.save(user)
+    }
+
+    override fun login(email: String, password: String): User {
+        val user = userRepository.findByEmail(email)
+            ?: throw EntityNotFoundException("User not found with email: $email")
+        if (!passwordEncoder.matches(password, user.password)) {
+            throw WrongPasswordException()
+        }
+        return user
     }
 
     override fun beginTransaction(userId: Long, intentionId: Long, clock: Clock?): Transaction {
@@ -75,5 +85,12 @@ class UserServiceImpl : UserService {
 
     override fun deleteAll() {
         userRepository.deleteAll()
+    }
+
+    override fun loadUserByUsername(username: String?): UserDetails {
+        // username en este caso sería el email, hacemos esta simplificacion para no re-implementar el loadUserByUsername
+        val user = userRepository.findByEmail(username!!)
+            ?: throw EntityNotFoundException("User not found with email: $username")
+        return UserDetailsDTO(user)
     }
 }

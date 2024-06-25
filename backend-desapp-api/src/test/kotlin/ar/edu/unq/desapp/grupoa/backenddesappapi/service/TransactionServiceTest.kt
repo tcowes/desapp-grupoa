@@ -1,8 +1,10 @@
 package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
-import ar.edu.unq.desapp.grupoa.backenddesappapi.model.*
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.OperationEnum
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.TransactionStatus
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.exceptionsTransaction.InvalidTransactionState
-import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.Mockito
@@ -251,9 +253,9 @@ class TransactionServiceTest {
 
 
     @Test
-    fun testGetVolumeOperated() {
+    fun getVolumeOperatedReturnsOnlyFinishedTransactions() {
         val startDate = LocalDateTime.now().minusDays(7)
-        val endDate = LocalDateTime.now()
+        val endDate = LocalDateTime.now().plusDays(1)
 
         val user = userService.createUser(userToCreate)
         val anotherUser = userService.createUser(anotherUserToCreate)
@@ -269,24 +271,25 @@ class TransactionServiceTest {
         val anotherIntention = intentionService.createIntention(
             CryptoCurrencyEnum.ETHUSDT,
             2.0,
-            200.0,
+            1000.0,
             anotherUser.id!!,
             OperationEnum.SELL
         )
+
         val aTransaction = userService.beginTransaction(anotherUser.id!!, anIntention.id!!, defaultClock)
-        val anotherTransaction = userService.beginTransaction(user.id!!, anotherIntention.id!!, defaultClock)
+        userService.finishTransaction(user.id!!, aTransaction.id!!, defaultClock)
+        // Iniciamos otra transaccion, pero esta no será finalizada y por ende quedará como pendiente
+        userService.beginTransaction(user.id!!, anotherIntention.id!!, defaultClock)
 
-        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT)).thenReturn(1000F)
-        `when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.MATICUSDT)).thenReturn(30000F)
+
         `when`(cryptoService.getCryptoCurrencyValueUSDTtoARS()).thenReturn(BigDecimal.valueOf(78.5))
-
         val result = transactionService.getVolumeOperated(user.id!!, startDate, endDate)
 
         assertNotNull(result)
-        //assertEquals(result.totalUSD, BigDecimal("40000.0"))
-        //assertEquals(result.totalARS, BigDecimal("12000000.0"))
-
+        assertEquals(BigDecimal("2000.0"), result.totalUSD)
+        assertEquals(BigDecimal("157000.00"), result.totalARS)
     }
+
     @AfterEach
     fun cleanUp() {
         intentionService.deleteAll()
