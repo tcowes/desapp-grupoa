@@ -160,7 +160,7 @@ class UserControllerTest {
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -213,7 +213,7 @@ class UserControllerTest {
         )
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -258,7 +258,7 @@ class UserControllerTest {
 
         Mockito.`when`(cryptoService.getCryptoQuote(CryptoCurrencyEnum.BTCUSDT)).thenReturn(1100F)
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/createTransaction/${intention.id!!}")
+            MockMvcRequestBuilders.post("/users/${anotherUser.id!!}/create-transaction/${intention.id!!}")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isCreated)
@@ -279,7 +279,7 @@ class UserControllerTest {
     @Test
     fun nonExistentUserCreatesTransactionAndReturns404() {
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/users/999/createTransaction/123465")
+            MockMvcRequestBuilders.post("/users/999/create-transaction/123465")
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(MockMvcResultMatchers.status().isNotFound)
