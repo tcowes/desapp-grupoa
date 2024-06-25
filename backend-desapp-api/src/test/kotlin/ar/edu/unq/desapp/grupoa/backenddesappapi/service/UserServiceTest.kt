@@ -4,9 +4,11 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.WrongPasswordException
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -14,6 +16,7 @@ import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -160,6 +163,51 @@ class UserServiceTest {
             userService.createUser(userWithSameMail)
         }
         assertEquals("There's a user with the wallet 01234567 already registered in the database.", error.message)
+    }
+
+    @Test
+    fun loginSuccessfully() {
+        val createdUser = userService.createUser(userToCreate)
+        val loggedUser = userService.login(createdUser.email, "Security1234!")
+        assertEquals(loggedUser.id, createdUser.id)
+        assertEquals(loggedUser.email, createdUser.email)
+    }
+
+    @Test
+    fun loginWithWrongPasswordThrowsException() {
+        val createdUser = userService.createUser(userToCreate)
+        val error = assertThrows<WrongPasswordException> {
+            userService.login(createdUser.email, "NotSecurity1234!")
+        }
+        assertEquals("Couldn't log-in, incorrect password!", error.message)
+    }
+
+    @Test
+    fun loginWithUnrecognizedEmailThrowsException() {
+        val error = assertThrows<EntityNotFoundException> {
+            userService.login("fakeemail@gmail.com", "NotSecurity1234!")
+        }
+        assertEquals("User not found with email: fakeemail@gmail.com", error.message)
+    }
+
+    @Test
+    fun loadUserByUsernameReturnsDetails() {
+        val createdUser = userService.createUser(userToCreate)
+        val userDetails = userService.loadUserByUsername(createdUser.email)
+        assertEquals(emptyList<SimpleGrantedAuthority>(), userDetails.authorities)
+        assertEquals("satonaka@gmail.com", userDetails.username)
+        assertTrue(userDetails.isEnabled)
+        assertTrue(userDetails.isAccountNonExpired)
+        assertTrue(userDetails.isAccountNonLocked)
+        assertTrue(userDetails.isCredentialsNonExpired)
+    }
+
+    @Test
+    fun loadUserByUsernameWithUnrecognizedEmailThrowsException() {
+        val error = assertThrows<EntityNotFoundException> {
+            userService.loadUserByUsername("fakeemail@gmail.com")
+        }
+        assertEquals("User not found with email: fakeemail@gmail.com", error.message)
     }
 
     @ParameterizedTest

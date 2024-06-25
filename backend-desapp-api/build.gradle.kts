@@ -97,8 +97,8 @@ tasks.jacocoTestReport {
         files(classDirectories.files.map {
             fileTree(it).matching {
                 exclude(
-                    "ar/edu/unq/desapp/grupoa/backenddesappapi/service/integration",
-                    "ar/edu/unq/desapp/grupoa/backenddesappapi/webservice/security"
+                    "/ar/edu/unq/desapp/grupoa/backenddesappapi/service/integration/**",
+                    "/ar/edu/unq/desapp/grupoa/backenddesappapi/webservice/security/**"
                 )
             }
         })
