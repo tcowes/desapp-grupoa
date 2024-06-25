@@ -2,10 +2,14 @@ package ar.edu.unq.desapp.grupoa.backenddesappapi.service
 
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.service.integration.BinanceApi
+import com.github.benmanes.caffeine.cache.Cache
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.Mockito
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -28,7 +32,7 @@ class CryptoCurrencyServiceTest {
             "BTCUSDT" to null
         )
 
-        Mockito.`when`(binanceApi.showCryptoAssetQuotes()).thenReturn(mockQuotes)
+        `when`(binanceApi.showCryptoAssetQuotes()).thenReturn(mockQuotes)
 
         val cryptoAsset = cryptoService.showCryptoAssetQuotes()
 
@@ -52,13 +56,48 @@ class CryptoCurrencyServiceTest {
 
     @Test
     fun testGetCryptoQuoteReturnsValue() {
-        Mockito.`when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.ETHUSDT.name)).thenReturn(1000F)
+        `when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.ETHUSDT.name)).thenReturn(1000F)
         assertEquals(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT), 1000F)
     }
 
     @Test
     fun testGetCryptoQuoteReturnsNullIfAnExceptionOccurs() {
-        Mockito.`when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.ETHUSDT.name)).thenThrow(RuntimeException())
+        `when`(binanceApi.getCryptoCurrencyValue(CryptoCurrencyEnum.ETHUSDT.name)).thenThrow(RuntimeException())
         assertEquals(cryptoService.getCryptoQuote(CryptoCurrencyEnum.ETHUSDT), null)
     }
+    @Test
+    fun testShowCryptoAssetQuotesEvery10Minutes() {
+        val mockData = listOf(
+            mapOf("timestamp" to "2024-06-19T10:00:00", "price" to "1000"),
+            mapOf("timestamp" to "2024-06-19T10:05:00", "price" to "1100"),
+            mapOf("timestamp" to "2024-06-19T10:10:00", "price" to "1200"),
+            mapOf("timestamp" to "2024-06-19T10:15:00", "price" to "1300")
+        )
+
+        `when`(binanceApi.getCryptoCurrencyValueHistory(anyString(), anyString(), anyInt()))
+            .thenReturn(mockData)
+
+        val quotes = cryptoService.showCryptoAssetQuotesEvery10Minutes()
+
+        assertNotNull(quotes)
+        assertEquals(14, quotes.size)
+
+        for ((crypto, quotesList) in quotes) {
+            assertTrue(quotesList.isNotEmpty())
+            assertTrue(quotesList[0].startsWith("Quotes every 10 minutes for $crypto:"))
+        }
+    }
+
+    @Test
+    fun testShowCryptoAssetQuotesErrorHandling() {
+        `when`(binanceApi.getCryptoCurrencyValueHistory(anyString(), anyString(), anyInt()))
+            .thenThrow(RuntimeException("Error fetching data"))
+
+        val quotesWithError = cryptoService.showCryptoAssetQuotesEvery10Minutes()
+
+        assertTrue(quotesWithError.containsKey("error"))
+        assertEquals(1, quotesWithError["error"]?.size)
+        assertTrue(quotesWithError["error"]?.get(0)?.startsWith("Error getting quotes:") ?: false)
+    }
+
 }

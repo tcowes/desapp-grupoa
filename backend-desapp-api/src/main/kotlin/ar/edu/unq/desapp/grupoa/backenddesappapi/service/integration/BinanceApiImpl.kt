@@ -34,11 +34,11 @@ class BinanceApiImpl : BinanceApi {
         }
     }
 
-    override fun getCryptoCurrencyValueHistory(symbol: String, hours: Int): List<Map<String, String>> {
+    override fun getCryptoCurrencyValueHistory(symbol: String, interval: String, hours: Int): List<Map<String, String>> {
         val endTime = Instant.now().toEpochMilli()
         val startTime = endTime - hours * 60 * 60 * 1000
 
-        val url = "https://api.binance.com/api/v3/klines?symbol=$symbol&interval=1h&startTime=$startTime&endTime=$endTime"
+        val url = "https://api.binance.com/api/v3/klines?symbol=$symbol&interval=$interval&startTime=$startTime&endTime=$endTime"
         val (_, _, result) = url.httpGet().responseString()
         return when (result) {
             is Result.Success -> parseHistoryData(result.get())
