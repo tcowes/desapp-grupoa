@@ -4,6 +4,7 @@ import ar.edu.unq.desapp.grupoa.backenddesappapi.model.CryptoCurrencyEnum
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.User
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.ErrorCreatingUserException
 import ar.edu.unq.desapp.grupoa.backenddesappapi.model.exceptions.UserAlreadyRegisteredException
+import ar.edu.unq.desapp.grupoa.backenddesappapi.persistence.UserRepository
 import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -23,6 +24,9 @@ class UserServiceTest {
 
     @Autowired
     private lateinit var userService: UserService
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var transactionService: TransactionService
@@ -401,7 +405,46 @@ class UserServiceTest {
             ),
         )
     }
+    @Test
+    fun listUsersShouldReturnUserDetails() {
+        val userToCreate = User(
+            "Satoshi",
+            "Nakamoto",
+            "satonaka@gmail.com",
+            "Fake Street 123",
+            "Security1234!",
+            "0011223344556677889911",
+            "01234567",
+            5.0
+        )
 
+        userService.createUser(userToCreate)
+
+        val result = userService.listUsers()
+
+        val expected = mapOf(
+            "Satoshi Nakamoto" to listOf(
+                "Name: Satoshi",
+                "Surname: Nakamoto",
+                "Number of Operations: 0",
+                "Reputation: 5.0"
+            )
+        )
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun listUsersShouldHandleEmptyUserList() {
+        val result = userService.listUsers()
+
+        assertEquals(emptyMap<String, List<String>>(), result)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        userRepository.deleteAll()
+    }
     @AfterEach
     fun cleanUp() {
         intentionService.deleteAll()
