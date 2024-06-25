@@ -180,6 +180,10 @@ class UserController(
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something went wrong! ${ex.message}")
         }
     }
+    @GetMapping("/listUsers")
+    fun listUsers(): Map<String, List<String>> {
+        return userService.listUsers()
+    }
 
 
     @Operation(

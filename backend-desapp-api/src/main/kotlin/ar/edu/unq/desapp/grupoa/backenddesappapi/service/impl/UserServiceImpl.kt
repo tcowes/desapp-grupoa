@@ -83,6 +83,28 @@ class UserServiceImpl(
         userRepository.save(user)
     }
 
+    override fun listUsers(): Map<String, List<String>> {
+        val usersByReputation = mutableMapOf<String, List<String>>()
+
+        try {
+            val users = userRepository.findAll()
+            for (user in users) {
+                val userInfo = mutableListOf<String>()
+
+                userInfo.add("Name: ${user.name}")
+                userInfo.add("Surname: ${user.surname}")
+                userInfo.add("Number of Operations: ${user.transactionsAsSeller.size + user.transactionsAsBuyer.size}")
+                userInfo.add("Reputation: ${user.reputation}")
+
+                usersByReputation[user.name + " " + user.surname] = userInfo
+            }
+        } catch (e: Exception) {
+            usersByReputation["error"] = listOf("Error getting list of users: ${e.message}")
+        }
+
+        return usersByReputation
+    }
+
     override fun deleteAll() {
         userRepository.deleteAll()
     }
